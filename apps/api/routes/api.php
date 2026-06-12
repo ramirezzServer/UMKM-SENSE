@@ -3,9 +3,14 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProfileController;
+use App\Models\District;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
+
+Route::get('/districts', fn () => response()->json(
+    District::orderBy('city')->orderBy('name')->get(['id', 'name', 'city', 'province'])
+));
 
 Route::post('/register', [AuthController::class, 'register'])
     ->middleware('throttle:register');
