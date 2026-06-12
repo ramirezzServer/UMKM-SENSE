@@ -1,5 +1,8 @@
 import api from '@/lib/api';
+import axios from 'axios';
 import type {
+  ImportConfirmResponse,
+  ImportPreviewResponse,
   PaginatedTransactions,
   SelectProduct,
   Transaction,
@@ -47,4 +50,53 @@ export async function updateTransaction(
 export async function deleteTransaction(id: number): Promise<{ message: string }> {
   const { data } = await api.delete<{ message: string }>(`/api/transactions/${id}`);
   return data;
+}
+
+// ─── Import flow ──────────────────────────────────────────────────────────────
+
+export async function downloadTemplate(): Promise<void> {
+  const response = await api.get('/api/transactions/import/template', {
+    responseType: 'blob',
+  });
+  const blob = new Blob([response.data as BlobPart], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'template_transaksi.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export async function previewImport(file: File): Promise<ImportPreviewResponse> {
+  const fd = new FormData();
+  fd.append('file', file);
+  const { data } = await api.post<ImportPreviewResponse>('/api/transactions/import/preview', fd);
+  return data;
+}
+
+export async function confirmImport(token: string): Promise<ImportConfirmResponse> {
+  const { data } = await api.post<ImportConfirmResponse>('/api/transactions/import/confirm', {
+    preview_token: token,
+  });
+  return data;
+}
+
+export function extractImportError(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const status = err.response?.status;
+    const body = err.response?.data as Record<string, unknown> | undefined;
+    if (status === 422) {
+      const fileErrors = (body?.errors as Record<string, string[]> | undefined)?.file;
+      if (fileErrors?.[0]) return fileErrors[0];
+      const msg = body?.message as string | undefined;
+      if (msg) return msg;
+      return 'File tidak valid. Periksa format, header, dan isi file.';
+    }
+    const msg = body?.message as string | undefined;
+    if (msg) return msg;
+    if (status === 413) return 'Ukuran file terlalu besar untuk diunggah.';
+  }
+  return 'Terjadi kesalahan tak terduga. Silakan coba lagi.';
 }

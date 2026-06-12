@@ -4,6 +4,7 @@ import { useTransactions, useDeleteTransaction } from '@/features/sales/hooks';
 import TransactionModal from '@/features/sales/TransactionModal';
 import TransactionDetailModal from '@/features/sales/TransactionDetailModal';
 import DeleteTransactionDialog from '@/features/sales/DeleteTransactionDialog';
+import ImportModal from '@/features/sales/ImportModal';
 import Button from '@/components/ui/Button';
 import type { Transaction } from '@/features/sales/types';
 
@@ -72,6 +73,7 @@ export default function SalesPage() {
   const [page, setPage] = useState(1);
 
   const [showModal, setShowModal] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [editTransaction, setEditTransaction] = useState<Transaction | null>(null);
   const [viewTransaction, setViewTransaction] = useState<Transaction | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
@@ -130,18 +132,36 @@ export default function SalesPage() {
           <h1 className="text-2xl font-bold text-gray-900">Data Penjualan</h1>
           {meta && <p className="mt-0.5 text-sm text-gray-500">{meta.total} transaksi ditemukan</p>}
         </div>
-        <Button onClick={handleOpenAdd}>
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Tambah Transaksi
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={() => setShowImport(true)}>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+              />
+            </svg>
+            Import CSV
+          </Button>
+          <Button onClick={handleOpenAdd}>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Tambah Transaksi
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -401,6 +421,8 @@ export default function SalesPage() {
         onCancel={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
       />
+
+      <ImportModal isOpen={showImport} onClose={() => setShowImport(false)} />
 
       {/* Toast */}
       <AnimatePresence>

@@ -50,3 +50,42 @@ export interface SelectProduct {
   price: number;
   current_stock: number;
 }
+
+// ─── Import flow ──────────────────────────────────────────────────────────────
+
+export interface ImportPreviewError {
+  row: number;
+  errors: string[];
+}
+
+export interface ImportPreviewWarning {
+  row: number;
+  message: string;
+}
+
+export interface ImportPreviewRow {
+  row_number: number;
+  transaction_date: string;
+  product_name_lower: string;
+  qty: number;
+  payment_method: string;
+  customer_name: string | null;
+}
+
+export interface ImportPreviewResponse {
+  preview_token: string;
+  summary: {
+    total: number;
+    valid: number;
+    invalid: number;
+  };
+  errors: ImportPreviewError[];
+  warnings: ImportPreviewWarning[];
+  preview: ImportPreviewRow[];
+}
+
+export interface ImportConfirmResponse {
+  message: string;
+  imported: number;
+  skipped: { row: number; reason: string }[];
+}
