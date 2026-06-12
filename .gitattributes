@@ -1,0 +1,36 @@
+# Normalize all text files to LF on checkout
+* text=auto eol=lf
+
+# Explicit LF for every source type we use
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.js    text eol=lf
+*.jsx   text eol=lf
+*.json  text eol=lf
+*.css   text eol=lf
+*.md    text eol=lf
+*.php   text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.html  text eol=lf
+*.sh    text eol=lf
+*.env   text eol=lf
+
+# Binary — never mangle line endings
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.webp   binary
+*.gif    binary
+*.ico    binary
+*.woff   binary
+*.woff2  binary
+*.eot    binary
+*.ttf    binary
+*.otf    binary
+*.pdf    binary
+*.zip    binary
+*.7z     binary
+
+# SVG is text — treat as LF
+*.svg   text eol=lf
