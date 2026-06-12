@@ -114,3 +114,21 @@ export const TransactionSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 export type Transaction = z.infer<typeof TransactionSchema>;
+
+// ─── Product Form Schema ─────────────────────────────────────────────────────
+// Note: image field omitted — z.instanceof(File) is browser-only; extend in UI layer.
+
+export const ProductFormSchema = z.object({
+  name: z.string().min(1, 'Nama produk wajib diisi').max(100, 'Nama maksimal 100 karakter'),
+  category: z.string().max(50, 'Kategori maksimal 50 karakter').optional(),
+  price: z.coerce
+    .number({ invalid_type_error: 'Harga harus berupa angka' })
+    .min(0.01, 'Harga minimal Rp 0,01')
+    .max(10_000_000, 'Harga maksimal Rp 10.000.000'),
+  current_stock: z.coerce
+    .number({ invalid_type_error: 'Stok harus berupa angka' })
+    .int('Stok harus bilangan bulat')
+    .min(0, 'Stok tidak boleh negatif'),
+  status: z.enum(['active', 'inactive']),
+});
+export type ProductForm = z.infer<typeof ProductFormSchema>;

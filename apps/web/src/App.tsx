@@ -16,6 +16,7 @@ import LoginPage from '@/routes/login';
 import RegisterPage from '@/routes/register';
 import ResetPasswordPage from '@/routes/reset-password';
 import DashboardPage from '@/routes/dashboard';
+import ProductsPage from '@/routes/products';
 
 // ─── Scroll restoration ───────────────────────────────────────────────────────
 
@@ -65,6 +66,7 @@ const router = createBrowserRouter([
             children: [
               { path: '/', element: <Navigate to="/dashboard" replace /> },
               { path: '/dashboard', element: <DashboardPage /> },
+              { path: '/products', element: <ProductsPage /> },
               // Catch-all inside protected area redirects home
               { path: '*', element: <Navigate to="/dashboard" replace /> },
             ],
