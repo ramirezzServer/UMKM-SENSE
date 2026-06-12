@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  frontend:
+    name: Frontend (lint & build)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --filter web run lint
+
+      - name: Build
+        run: pnpm --filter web run build
+
+  backend:
+    name: Backend (test & pint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_sqlite, pdo_pgsql
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: apps/api/vendor
+          key: composer-${{ hashFiles('apps/api/composer.lock') }}
+          restore-keys: |
+            composer-
+
+      - name: Install Composer dependencies
+        working-directory: apps/api
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy .env for testing
+        working-directory: apps/api
+        run: cp .env.example .env && php artisan key:generate
+
+      - name: Run tests
+        working-directory: apps/api
+        run: php artisan test
+
+      - name: Check code style (Pint)
+        working-directory: apps/api
+        run: php vendor/bin/pint --test
