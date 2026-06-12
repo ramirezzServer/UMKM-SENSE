@@ -5,12 +5,19 @@ namespace Tests\Feature;
 use App\Models\District;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::flush(); // reset rate limiters between tests
+    }
 
     /**
      * Simulate a stateful SPA request (browser from localhost:5173).
@@ -111,5 +118,22 @@ class AuthTest extends TestCase
         $response = $this->getJson('/api/me');
 
         $response->assertStatus(401);
+    }
+
+    public function test_login_rate_limits_after_5_attempts(): void
+    {
+        // 5 failed attempts should all return 422
+        for ($i = 0; $i < 5; $i++) {
+            $this->spa()->postJson('/api/login', [
+                'email' => 'budi@example.com',
+                'password' => 'salah_password',
+            ])->assertStatus(422);
+        }
+
+        // 6th attempt hits the rate limiter → 429
+        $this->spa()->postJson('/api/login', [
+            'email' => 'budi@example.com',
+            'password' => 'salah_password',
+        ])->assertStatus(429);
     }
 }
