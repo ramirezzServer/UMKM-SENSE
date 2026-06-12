@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Explicit ID route — demonstrates IDOR/ownership protection via BusinessPolicy
     Route::put('/business/{business}', [ProfileController::class, 'updateById']);
 
+    Route::get('/products/select', [ProductController::class, 'select']);
     Route::apiResource('products', ProductController::class);
 
     // Import routes BEFORE apiResource to avoid {transaction} binding conflict

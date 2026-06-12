@@ -16,6 +16,23 @@ class ProductController extends Controller
 {
     public function __construct(private readonly ImageService $imageService) {}
 
+    public function select(Request $request): JsonResponse
+    {
+        $products = Product::ownedBy($request->user()->id)
+            ->active()
+            ->orderBy('name')
+            ->get(['id', 'name', 'price', 'current_stock']);
+
+        return response()->json([
+            'data' => $products->map(fn ($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'price' => (float) $p->price,
+                'current_stock' => $p->current_stock,
+            ]),
+        ]);
+    }
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $products = Product::ownedBy($request->user()->id)

@@ -118,6 +118,31 @@ export type Transaction = z.infer<typeof TransactionSchema>;
 // ─── Product Form Schema ─────────────────────────────────────────────────────
 // Note: image field omitted — z.instanceof(File) is browser-only; extend in UI layer.
 
+// ─── Transaction Form Schema ─────────────────────────────────────────────────
+
+export const TransactionItemFormSchema = z.object({
+  product_id: z.coerce.number().int().min(1, 'Pilih produk terlebih dahulu'),
+  qty: z.coerce
+    .number({ invalid_type_error: 'Qty harus berupa angka' })
+    .int('Qty harus bilangan bulat')
+    .min(1, 'Qty minimal 1')
+    .max(9999, 'Qty maksimal 9.999'),
+});
+export type TransactionItemForm = z.infer<typeof TransactionItemFormSchema>;
+
+export const TransactionFormSchema = z.object({
+  customer_name: z.string().max(100, 'Nama pelanggan maksimal 100 karakter').optional(),
+  transaction_date: z.string().min(1, 'Tanggal wajib diisi'),
+  payment_method: z.enum(['Transfer', 'Cash', 'QRIS'], {
+    required_error: 'Metode bayar wajib dipilih',
+  }),
+  status: z.enum(['success', 'pending', 'failed']),
+  items: z.array(TransactionItemFormSchema).min(1, 'Minimal 1 item transaksi'),
+});
+export type TransactionForm = z.infer<typeof TransactionFormSchema>;
+
+// ─── Product Form Schema ─────────────────────────────────────────────────────
+
 export const ProductFormSchema = z.object({
   name: z.string().min(1, 'Nama produk wajib diisi').max(100, 'Nama maksimal 100 karakter'),
   category: z.string().max(50, 'Kategori maksimal 50 karakter').optional(),
