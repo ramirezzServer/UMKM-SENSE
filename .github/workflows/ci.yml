@@ -17,8 +17,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -63,9 +61,21 @@ jobs:
         working-directory: apps/api
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Copy .env for testing
+      - name: Copy .env
         working-directory: apps/api
-        run: cp .env.example .env && php artisan key:generate
+        run: cp .env.example .env
+
+      - name: Generate application key
+        working-directory: apps/api
+        run: php artisan key:generate
+
+      - name: Create cache directories
+        working-directory: apps/api
+        run: mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
+
+      - name: Clear config cache
+        working-directory: apps/api
+        run: php artisan config:clear
 
       - name: Run tests
         working-directory: apps/api
