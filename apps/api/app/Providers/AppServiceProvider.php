@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Product;
+use App\Models\Transaction;
 use App\Policies\ProductPolicy;
+use App\Policies\TransactionPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Product::class, ProductPolicy::class);
+        Gate::policy(Transaction::class, TransactionPolicy::class);
         $this->configureRateLimiters();
     }
 

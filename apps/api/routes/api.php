@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TransactionController;
 use App\Models\District;
 use Illuminate\Support\Facades\Route;
 
@@ -39,4 +40,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/business/{business}', [ProfileController::class, 'updateById']);
 
     Route::apiResource('products', ProductController::class);
+    Route::apiResource('transactions', TransactionController::class);
 });
