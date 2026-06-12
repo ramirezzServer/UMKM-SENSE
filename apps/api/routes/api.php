@@ -5,6 +5,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\TransactionImportController;
 use App\Models\District;
 use Illuminate\Support\Facades\Route;
 
@@ -40,5 +41,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/business/{business}', [ProfileController::class, 'updateById']);
 
     Route::apiResource('products', ProductController::class);
+
+    // Import routes BEFORE apiResource to avoid {transaction} binding conflict
+    Route::get('/transactions/import/template', [TransactionImportController::class, 'template']);
+    Route::post('/transactions/import/preview', [TransactionImportController::class, 'preview']);
+    Route::post('/transactions/import/confirm', [TransactionImportController::class, 'confirm']);
+
     Route::apiResource('transactions', TransactionController::class);
 });
