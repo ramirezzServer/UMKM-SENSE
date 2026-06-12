@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Models\District;
 use Illuminate\Support\Facades\Route;
@@ -36,4 +37,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Explicit ID route — demonstrates IDOR/ownership protection via BusinessPolicy
     Route::put('/business/{business}', [ProfileController::class, 'updateById']);
+
+    Route::apiResource('products', ProductController::class);
 });
