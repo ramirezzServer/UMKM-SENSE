@@ -410,6 +410,7 @@ export default function ImportModal({ isOpen, onClose }: Props) {
                       ref={fileInputRef}
                       type="file"
                       accept=".csv,.xlsx"
+                      aria-label="Pilih file CSV atau Excel untuk diimpor"
                       className="hidden"
                       onChange={(e) => {
                         const f = e.target.files?.[0];

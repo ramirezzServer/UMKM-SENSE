@@ -279,6 +279,7 @@ export default function ProductModal({ isOpen, product, onClose, onSuccess }: Pr
                   ref={fileInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
+                  aria-label="Pilih gambar produk (JPEG, PNG, atau WebP)"
                   className="hidden"
                   onChange={handleImageChange}
                 />
@@ -321,7 +322,7 @@ export default function ProductModal({ isOpen, product, onClose, onSuccess }: Pr
                     placeholder="0"
                     value={priceDisplay}
                     onChange={handlePriceChange}
-                    aria-invalid={!!errors.price}
+                    aria-invalid={errors.price ? 'true' : 'false'}
                     aria-describedby={errors.price ? 'modal-price-error' : undefined}
                     className="w-full rounded-r-lg bg-transparent py-2.5 pl-2 pr-3.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
                   />
@@ -356,7 +357,8 @@ export default function ProductModal({ isOpen, product, onClose, onSuccess }: Pr
                 <button
                   type="button"
                   role="switch"
-                  aria-checked={statusValue === 'active'}
+                  aria-checked={statusValue === 'active' ? 'true' : 'false'}
+                  aria-label={statusValue === 'active' ? 'Nonaktifkan produk' : 'Aktifkan produk'}
                   onClick={() =>
                     setValue('status', statusValue === 'active' ? 'inactive' : 'active', {
                       shouldValidate: true,

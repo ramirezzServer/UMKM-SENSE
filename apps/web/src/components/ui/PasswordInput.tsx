@@ -21,7 +21,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             id={inputId}
             type={visible ? 'text' : 'password'}
             {...props}
-            aria-invalid={!!error}
+            aria-invalid={error ? 'true' : 'false'}
             aria-describedby={error ? `${inputId}-error` : undefined}
             className={
               'w-full rounded-lg border px-3.5 py-2.5 pr-11 text-sm text-gray-900 shadow-sm ' +

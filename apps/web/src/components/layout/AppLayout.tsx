@@ -301,7 +301,7 @@ export default function AppLayout() {
           <button
             type="button"
             aria-label={sidebarOpen ? 'Tutup navigasi' : 'Buka navigasi'}
-            aria-expanded={sidebarOpen}
+            aria-expanded={sidebarOpen ? 'true' : 'false'}
             onClick={() => setSidebarOpen((v) => !v)}
             className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >

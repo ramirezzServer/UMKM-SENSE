@@ -227,7 +227,7 @@ export default function TransactionModal({ isOpen, transaction, onClose, onSucce
                     id="tx-date"
                     type="date"
                     max={today}
-                    aria-invalid={!!errors.transaction_date}
+                    aria-invalid={errors.transaction_date ? 'true' : 'false'}
                     className={errors.transaction_date ? selectErrorClass : selectClass}
                     {...register('transaction_date')}
                   />
@@ -243,7 +243,7 @@ export default function TransactionModal({ isOpen, transaction, onClose, onSucce
                   </label>
                   <select
                     id="tx-payment"
-                    aria-invalid={!!errors.payment_method}
+                    aria-invalid={errors.payment_method ? 'true' : 'false'}
                     className={errors.payment_method ? selectErrorClass : selectClass}
                     {...register('payment_method')}
                   >
@@ -263,7 +263,7 @@ export default function TransactionModal({ isOpen, transaction, onClose, onSucce
                   </label>
                   <select
                     id="tx-status"
-                    aria-invalid={!!errors.status}
+                    aria-invalid={errors.status ? 'true' : 'false'}
                     className={errors.status ? selectErrorClass : selectClass}
                     {...register('status')}
                   >
@@ -338,7 +338,7 @@ export default function TransactionModal({ isOpen, transaction, onClose, onSucce
                         <div>
                           <select
                             aria-label={`Produk item ${i + 1}`}
-                            aria-invalid={!!errors.items?.[i]?.product_id}
+                            aria-invalid={errors.items?.[i]?.product_id ? 'true' : 'false'}
                             className={
                               errors.items?.[i]?.product_id ? selectErrorClass : selectClass
                             }
@@ -369,7 +369,7 @@ export default function TransactionModal({ isOpen, transaction, onClose, onSucce
                             max={9999}
                             placeholder="1"
                             aria-label={`Qty item ${i + 1}`}
-                            aria-invalid={!!errors.items?.[i]?.qty}
+                            aria-invalid={errors.items?.[i]?.qty ? 'true' : 'false'}
                             className={
                               (errors.items?.[i]?.qty
                                 ? 'border-red-400 bg-red-50'

@@ -45,7 +45,7 @@ function SkeletonRow() {
     <tr className="animate-pulse">
       {[48, 72, 120, 72, 72, 96].map((w, i) => (
         <td key={i} className="px-4 py-3">
-          <div className={`h-4 rounded bg-gray-200`} style={{ width: w }} />
+          <div className="h-4 rounded bg-gray-200" style={{ width: w }} />
         </td>
       ))}
       <td className="px-4 py-3">
@@ -361,6 +361,7 @@ export default function SalesPage() {
       {meta && meta.last_page > 1 && (
         <div className="mt-6 flex items-center justify-center gap-2">
           <button
+            type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1 || isFetching}
             className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
@@ -380,6 +381,7 @@ export default function SalesPage() {
             {page} / {meta.last_page}
           </span>
           <button
+            type="button"
             onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
             disabled={page === meta.last_page || isFetching}
             className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"

@@ -128,7 +128,7 @@ export default function RegisterPage() {
               <select
                 id="business_category"
                 {...register('business_category')}
-                aria-invalid={errors.business_category ? true : undefined}
+                aria-invalid={errors.business_category ? 'true' : 'false'}
                 className={
                   'w-full rounded-lg border px-3.5 py-2.5 text-sm text-gray-900 shadow-sm ' +
                   'bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ' +
@@ -159,7 +159,7 @@ export default function RegisterPage() {
                 id="district"
                 {...register('district')}
                 disabled={loadingDistricts}
-                aria-invalid={errors.district ? true : undefined}
+                aria-invalid={errors.district ? 'true' : 'false'}
                 className={
                   'w-full rounded-lg border px-3.5 py-2.5 text-sm text-gray-900 shadow-sm ' +
                   'bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ' +
