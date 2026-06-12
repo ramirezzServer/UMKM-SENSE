@@ -1,0 +1,8 @@
+{
+  "apps/web/**/*.{ts,tsx}": [
+    "eslint --fix --config ./apps/web/eslint.config.js",
+    "prettier --write"
+  ],
+  "apps/api/**/*.php": ["php apps/api/vendor/bin/pint"],
+  "**/*.{json,yaml,yml,md}": ["prettier --write --ignore-unknown"]
+}

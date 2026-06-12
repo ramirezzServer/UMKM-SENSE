@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+.turbo
+pnpm-lock.yaml
+apps/api/vendor
+apps/api/storage
+apps/api/bootstrap/cache
+apps/api/public/build
+apps/api/*.lock
+services/predict/.venv
+services/predict/venv
