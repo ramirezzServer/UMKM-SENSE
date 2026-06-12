@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginFormSchema, type LoginForm } from '@umkm-sense/shared';
@@ -11,6 +11,9 @@ import PasswordInput from '@/components/ui/PasswordInput';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // ProtectedRoute stores the intended path in state.from
+  const from = (location.state as { from?: string } | null)?.from ?? '/dashboard';
   const loginMutation = useLogin();
   const [globalError, setGlobalError] = useState<string | null>(null);
 
@@ -32,7 +35,7 @@ export default function LoginPage() {
     setGlobalError(null);
     try {
       await loginMutation.mutateAsync(data);
-      navigate('/', { replace: true });
+      navigate(from, { replace: true });
     } catch (err) {
       const msg = applyServerErrors(err, setError);
       setGlobalError(msg);
