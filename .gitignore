@@ -1,0 +1,70 @@
+# ─── Node / JavaScript ───────────────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+dist/
+build/
+.cache/
+.turbo/
+*.tsbuildinfo
+
+# Vite
+.vite/
+
+# ─── PHP / Laravel ───────────────────────────────────────────────────────────
+/apps/api/vendor/
+/apps/api/storage/logs/*.log
+/apps/api/storage/framework/cache/
+/apps/api/storage/framework/sessions/
+/apps/api/storage/framework/views/
+/apps/api/bootstrap/cache/*.php
+/apps/api/.env
+/apps/api/.env.backup
+/apps/api/.phpunit.result.cache
+/apps/api/Homestead.json
+/apps/api/Homestead.yaml
+/apps/api/npm-debug.log
+/apps/api/yarn-error.log
+
+# ─── Python / FastAPI ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+.Python
+services/predict/venv/
+services/predict/.venv/
+services/predict/env/
+services/predict/.env
+*.egg-info/
+dist/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ─── Environment & Secrets ───────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.local
+
+# ─── OS & Editors ────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Test Coverage ───────────────────────────────────────────────────────────
+coverage/
+*.lcov
