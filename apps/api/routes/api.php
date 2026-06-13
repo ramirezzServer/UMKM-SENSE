@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -52,4 +53,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('transactions', TransactionController::class);
 
     Route::get('/weather/today', [WeatherController::class, 'today']);
+    Route::get('/holidays', [HolidayController::class, 'index']);
 });

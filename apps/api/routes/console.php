@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // 06:00 WIB = 23:00 UTC (previous day); runs daily to warm the weather cache before users arrive
 Schedule::command('weather:sync')->dailyAt('23:00')->timezone('UTC');
+
+// Holiday data is stable (yearly); monthly re-sync keeps next year's data pre-populated
+Schedule::command('holidays:sync')->monthly();
