@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProductController;
@@ -54,4 +55,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/weather/today', [WeatherController::class, 'today']);
     Route::get('/holidays', [HolidayController::class, 'index']);
+
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/summary', [DashboardController::class, 'summary']);
+        Route::get('/trend', [DashboardController::class, 'trend']);
+        Route::get('/top-products', [DashboardController::class, 'topProducts']);
+        Route::get('/conditions', [DashboardController::class, 'conditions']);
+    });
 });
