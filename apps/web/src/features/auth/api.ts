@@ -2,12 +2,9 @@ import api from '@/lib/api';
 import type { ForgotPasswordForm, LoginForm, RegisterForm } from '@umkm-sense/shared';
 import type { AuthUser, District } from './types';
 
-// Derive app origin from the API base URL (strip path like /api)
-const APP_ORIGIN = new URL(import.meta.env.VITE_API_URL as string).origin;
-
-/** Must be called before any state-changing Sanctum SPA request to get the CSRF cookie. */
+/** Fetches the CSRF cookie from Laravel Sanctum before any mutating request. */
 async function fetchCsrfCookie(): Promise<void> {
-  await api.get(`${APP_ORIGIN}/sanctum/csrf-cookie`);
+  await api.get('/sanctum/csrf-cookie');
 }
 
 export async function getMe(): Promise<AuthUser> {
