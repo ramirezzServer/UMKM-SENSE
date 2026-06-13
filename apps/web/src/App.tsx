@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router';
 import { QueryClientProvider } from '@tanstack/react-query';
 import queryClient from '@/lib/queryClient';
@@ -11,13 +11,13 @@ import GuestRoute from '@/routes/guards/GuestRoute';
 import AuthLayout from '@/components/layout/AuthLayout';
 import AppLayout from '@/components/layout/AppLayout';
 
-// Pages
-import LoginPage from '@/routes/login';
-import RegisterPage from '@/routes/register';
-import ResetPasswordPage from '@/routes/reset-password';
-import DashboardPage from '@/routes/dashboard';
-import ProductsPage from '@/routes/products';
-import SalesPage from '@/routes/sales';
+// Lazy page bundles — each route chunk loaded on first navigation
+const LoginPage = lazy(() => import('@/routes/login'));
+const RegisterPage = lazy(() => import('@/routes/register'));
+const ResetPasswordPage = lazy(() => import('@/routes/reset-password'));
+const DashboardPage = lazy(() => import('@/routes/dashboard'));
+const ProductsPage = lazy(() => import('@/routes/products'));
+const SalesPage = lazy(() => import('@/routes/sales'));
 
 // ─── Scroll restoration ───────────────────────────────────────────────────────
 
@@ -38,6 +38,16 @@ function RootWrapper() {
   );
 }
 
+// ─── Minimal page skeleton while lazy chunks load ─────────────────────────────
+
+function PageFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
+    </div>
+  );
+}
+
 // ─── Router ───────────────────────────────────────────────────────────────────
 
 const router = createBrowserRouter([
@@ -51,9 +61,30 @@ const router = createBrowserRouter([
           {
             element: <AuthLayout />,
             children: [
-              { path: '/login', element: <LoginPage /> },
-              { path: '/register', element: <RegisterPage /> },
-              { path: '/reset-password', element: <ResetPasswordPage /> },
+              {
+                path: '/login',
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <LoginPage />
+                  </Suspense>
+                ),
+              },
+              {
+                path: '/register',
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <RegisterPage />
+                  </Suspense>
+                ),
+              },
+              {
+                path: '/reset-password',
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <ResetPasswordPage />
+                  </Suspense>
+                ),
+              },
             ],
           },
         ],
@@ -66,10 +97,30 @@ const router = createBrowserRouter([
             element: <AppLayout />,
             children: [
               { path: '/', element: <Navigate to="/dashboard" replace /> },
-              { path: '/dashboard', element: <DashboardPage /> },
-              { path: '/sales', element: <SalesPage /> },
-              { path: '/products', element: <ProductsPage /> },
-              // Catch-all inside protected area redirects home
+              {
+                path: '/dashboard',
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <DashboardPage />
+                  </Suspense>
+                ),
+              },
+              {
+                path: '/sales',
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <SalesPage />
+                  </Suspense>
+                ),
+              },
+              {
+                path: '/products',
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <ProductsPage />
+                  </Suspense>
+                ),
+              },
               { path: '*', element: <Navigate to="/dashboard" replace /> },
             ],
           },
