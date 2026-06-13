@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionImportController;
+use App\Http\Controllers\WeatherController;
 use App\Models\District;
 use Illuminate\Support\Facades\Route;
 
@@ -49,4 +50,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/transactions/import/confirm', [TransactionImportController::class, 'confirm']);
 
     Route::apiResource('transactions', TransactionController::class);
+
+    Route::get('/weather/today', [WeatherController::class, 'today']);
 });
