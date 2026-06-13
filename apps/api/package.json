@@ -1,10 +1,12 @@
 {
   "$schema": "https://www.schemastore.org/package.json",
+  "name": "api",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "vite build",
     "dev": "vite",
+    "dev:server": "php artisan serve",
     "lint": "php vendor/bin/pint --test",
     "format": "php vendor/bin/pint"
   },

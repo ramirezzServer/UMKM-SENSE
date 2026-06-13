@@ -9,9 +9,13 @@
     "lint": "turbo run lint",
     "format": "turbo run format && prettier --write --ignore-unknown .",
     "test": "turbo run test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev:api": "pnpm --filter api run dev:server",
+    "dev:web": "pnpm --filter web dev",
+    "dev:all": "concurrently --names \"API,WEB\" --prefix-colors \"cyan,green\" \"pnpm run dev:api\" \"pnpm run dev:web\""
   },
   "devDependencies": {
+    "concurrently": "^9.0.1",
     "eslint": "^9.0.0",
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",

@@ -7,6 +7,7 @@ Platform analitik dan prediksi penjualan untuk UMKM Indonesia. Bantu pelaku usah
 ## Apa ini?
 
 UMKM-Sense adalah web app yang memungkinkan UMKM untuk:
+
 - Melacak dan memvisualisasikan data penjualan secara real-time
 - Mendapatkan prediksi tren penjualan ke depan
 - Membaca insight bisnis yang actionable tanpa perlu paham statistik
@@ -32,14 +33,14 @@ umkm-sense/
 
 ## Tech Stack
 
-| Layer        | Teknologi                          |
-|--------------|------------------------------------|
-| Frontend     | React 19, Vite, TypeScript         |
-| Backend API  | Laravel 11, PHP 8.3+               |
-| Prediksi     | Python 3.12+, FastAPI              |
-| Database     | PostgreSQL                         |
-| Cache/Queue  | Redis                              |
-| Monorepo     | Turborepo + pnpm workspaces        |
+| Layer       | Teknologi                   |
+| ----------- | --------------------------- |
+| Frontend    | React 19, Vite, TypeScript  |
+| Backend API | Laravel 11, PHP 8.3+        |
+| Prediksi    | Python 3.12+, FastAPI       |
+| Database    | PostgreSQL                  |
+| Cache/Queue | Redis                       |
+| Monorepo    | Turborepo + pnpm workspaces |
 
 ---
 
@@ -138,7 +139,84 @@ pnpm install
 
 ---
 
-## Cara Run
+## Menjalankan & Melihat Aplikasi (Mode Lokal — SQLite)
+
+> Setup cepat tanpa Docker: Laravel dikonfigurasi menggunakan **SQLite** untuk development lokal.
+
+### Langkah berurutan (pertama kali)
+
+```bash
+# 1. Install semua dependensi JS
+pnpm install
+
+# 2. Install dependensi PHP
+cd apps/api && composer install && cd ../..
+
+# 3. Konfigurasi env Laravel (sudah ada — SQLite, tidak perlu diubah)
+cd apps/api
+php artisan key:generate
+cd ../..
+
+# 4. Buat database, jalankan migrasi, seed data district
+cd apps/api
+php artisan migrate:fresh --seed
+cd ../..
+
+# 5. Seed akun demo dengan data penjualan realistis 30 hari
+cd apps/api
+php artisan db:seed --class=DemoSeeder
+cd ../..
+
+# 6. Sinkronisasi data cuaca untuk kecamatan akun demo
+cd apps/api
+php artisan weather:sync
+cd ../..
+
+# 7. Jalankan frontend + backend bersamaan
+pnpm dev:all
+```
+
+Buka **[http://localhost:5173](http://localhost:5173)** dan login:
+
+| Field    | Nilai            |
+| -------- | ---------------- |
+| Email    | `demo@umkm.test` |
+| Password | `password`       |
+
+Dashboard langsung menampilkan data — ringkasan hari ini, grafik tren 7 hari, produk terlaris (Kopi Hitam, Nasi Goreng Spesial, dll.), dan kondisi cuaca.
+
+---
+
+### Urutan singkat (setelah install pertama kali)
+
+```bash
+cd apps/api && php artisan migrate:fresh --seed && php artisan db:seed --class=DemoSeeder && php artisan weather:sync && cd ../..
+pnpm dev:all
+```
+
+---
+
+### Perintah dev berguna
+
+```bash
+pnpm dev:all              # Frontend + Backend bersamaan
+pnpm dev:web              # Hanya frontend (port 5173)
+pnpm dev:api              # Hanya backend (port 8000)
+
+pnpm --filter web build   # Build production frontend
+pnpm test                 # Semua test
+
+# Di apps/api:
+php artisan test                          # Jalankan semua feature test
+php artisan db:seed --class=DemoSeeder    # Re-seed demo (idempotent)
+php artisan weather:sync                  # Sinkronisasi cuaca manual
+```
+
+> **Catatan `dev:all`**: Menjalankan `php artisan serve` (port 8000) dan Vite (port 5173) secara bersamaan via `concurrently`. Jika ingin memisahkan, buka dua terminal dan jalankan `pnpm dev:api` + `pnpm dev:web` masing-masing.
+
+---
+
+## Cara Run (Mode Turbo — semua workspace)
 
 ```bash
 # Jalankan semua apps sekaligus (development mode)
