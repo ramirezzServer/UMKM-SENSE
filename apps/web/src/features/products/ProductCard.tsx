@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
+import SmartImage from '@/components/ui/SmartImage';
 import type { Product } from './types';
 
 const formatRupiah = (n: number) =>
@@ -8,40 +8,6 @@ const formatRupiah = (n: number) =>
     currency: 'IDR',
     minimumFractionDigits: 0,
   }).format(n);
-
-function ProductImage({ url, alt }: { url: string | null; alt: string }) {
-  const [error, setError] = useState(false);
-
-  if (!url || error) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <svg
-          className="h-12 w-12 text-gray-300"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.5}
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-          />
-        </svg>
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={url}
-      alt={alt}
-      loading="lazy"
-      className="h-full w-full object-cover"
-      onError={() => setError(true)}
-    />
-  );
-}
 
 interface Props {
   product: Product;
@@ -58,10 +24,8 @@ export default function ProductCard({ product, index, onEdit, onDelete }: Props)
       transition={{ duration: 0.2, delay: Math.min(index * 0.04, 0.4) }}
       className="flex flex-col rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
     >
-      {/* Image */}
-      <div className="mb-3 h-36 overflow-hidden rounded-xl bg-gray-100">
-        <ProductImage url={product.image_url} alt={product.name} />
-      </div>
+      {/* Image — explicit h-36 prevents CLS */}
+      <SmartImage src={product.image_url} alt={product.name} className="mb-3 h-36 rounded-xl" />
 
       {/* Info */}
       <div className="flex flex-1 flex-col">
@@ -105,12 +69,14 @@ export default function ProductCard({ product, index, onEdit, onDelete }: Props)
       {/* Actions */}
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button
+          type="button"
           onClick={() => onEdit(product)}
           className="rounded-lg border border-indigo-200 px-3 py-1.5 text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-50 active:bg-indigo-100"
         >
           Edit
         </button>
         <button
+          type="button"
           onClick={() => onDelete(product)}
           className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
         >

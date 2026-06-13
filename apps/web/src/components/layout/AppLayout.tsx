@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth, useLogout } from '@/features/auth/hooks';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { prefetchRoute } from '@/lib/prefetch';
 import Button from '@/components/ui/Button';
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
@@ -174,12 +177,44 @@ const NAV_ITEMS = [
   { path: '/predictions', label: 'Riwayat Prediksi', icon: <IconTrending /> },
 ];
 
+// ─── Offline banner ───────────────────────────────────────────────────────────
+
+function OfflineBanner() {
+  return (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: 'auto', opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      transition={{ duration: 0.2, ease: 'easeInOut' }}
+      className="overflow-hidden"
+    >
+      <div className="flex items-center gap-2 bg-amber-50 px-4 py-2.5 text-sm text-amber-800 border-b border-amber-100">
+        <svg
+          className="h-4 w-4 flex-shrink-0 text-amber-500"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M18.364 5.636a9 9 0 010 12.728M15.536 8.464a5 5 0 010 7.072M6.343 6.343a9 9 0 000 12.728m2.829-2.829a5 5 0 000-7.072M12 12h.01"
+          />
+        </svg>
+        <span>Anda sedang offline. Beberapa fitur mungkin tidak berfungsi.</span>
+      </div>
+    </motion.div>
+  );
+}
+
 // ─── Sidebar content ──────────────────────────────────────────────────────────
 
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const { data: user } = useAuth();
   const logoutMutation = useLogout();
   const navigate = useNavigate();
+  const qc = useQueryClient();
 
   const handleLogout = async () => {
     onNavClick?.();
@@ -191,7 +226,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     <div className="flex h-full flex-col bg-white">
       {/* Logo */}
       <div className="flex h-16 flex-shrink-0 items-center gap-2 border-b border-gray-100 px-6">
-        <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600">
           <span className="text-xs font-bold text-white">U</span>
         </div>
         <span className="font-semibold text-gray-900">UMKM-Sense</span>
@@ -205,6 +240,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
               <NavLink
                 to={item.path}
                 onClick={onNavClick}
+                onMouseEnter={() => prefetchRoute(qc, item.path)}
                 className={({ isActive }) =>
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ' +
                   'transition-colors focus-visible:outline-none focus-visible:ring-2 ' +
@@ -254,6 +290,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const isOnline = useOnlineStatus();
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
@@ -309,6 +346,9 @@ export default function AppLayout() {
           </button>
           <span className="font-semibold text-gray-900">UMKM-Sense</span>
         </header>
+
+        {/* Offline banner — slides in/out, no layout shift */}
+        <AnimatePresence>{!isOnline && <OfflineBanner key="offline-banner" />}</AnimatePresence>
 
         {/* Page content with transition */}
         <AnimatePresence mode="wait" initial={false}>

@@ -1,0 +1,51 @@
+import type { QueryClient } from '@tanstack/react-query';
+import * as dashboardApi from '@/features/dashboard/api';
+import { DASHBOARD_KEYS } from '@/features/dashboard/hooks';
+import * as productsApi from '@/features/products/api';
+import { PRODUCT_KEYS } from '@/features/products/hooks';
+import * as salesApi from '@/features/sales/api';
+import { SALES_KEYS } from '@/features/sales/hooks';
+
+/**
+ * Prefetch data for a route on sidebar hover.
+ * TanStack Query respects staleTime — stale data is not re-fetched,
+ * so this is safe to call on every mouseenter.
+ */
+export function prefetchRoute(qc: QueryClient, path: string): void {
+  switch (path) {
+    case '/dashboard':
+      void qc.prefetchQuery({
+        queryKey: DASHBOARD_KEYS.summary,
+        queryFn: dashboardApi.getSummary,
+      });
+      void qc.prefetchQuery({
+        queryKey: DASHBOARD_KEYS.trend(7),
+        queryFn: () => dashboardApi.getSalesTrend(7),
+      });
+      void qc.prefetchQuery({
+        queryKey: DASHBOARD_KEYS.topProducts(7, 5),
+        queryFn: () => dashboardApi.getTopProducts(7, 5),
+      });
+      void qc.prefetchQuery({
+        queryKey: DASHBOARD_KEYS.conditions,
+        queryFn: dashboardApi.getConditions,
+      });
+      break;
+
+    case '/products':
+      void qc.prefetchQuery({
+        queryKey: PRODUCT_KEYS.list({}),
+        queryFn: () => productsApi.getProducts({}),
+      });
+      break;
+
+    case '/sales':
+      void qc.prefetchQuery({
+        queryKey: SALES_KEYS.list({}),
+        queryFn: () => salesApi.getTransactions({}),
+      });
+      break;
+
+    // Future routes can be added here
+  }
+}
