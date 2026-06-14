@@ -78,9 +78,20 @@ class AccuracyMetrics(BaseModel):
     mape: float = Field(..., description="Mean Absolute Percentage Error (%)")
 
 
+class Recommendation(BaseModel):
+    priority: Literal["high", "medium", "low"]
+    title: str
+    description: str
+
+
+class PredictionWarning(BaseModel):
+    level: Literal["high", "medium", "low"]
+    message: str
+
+
 class PredictionResponse(BaseModel):
     predictions: list[PredictionPoint]
     accuracy_metrics: AccuracyMetrics
     ai_summary: str
-    recommendations: list[str]
-    warnings: list[str]
+    recommendations: list[Recommendation]
+    warnings: list[PredictionWarning]

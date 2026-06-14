@@ -240,12 +240,14 @@ class TestRunForecastWMA:
     def test_minimal_data_has_warning(self):
         req = make_request(n=3, horizon=3)
         result = run_forecast(req)
-        assert any("kurang dari 7 hari" in w for w in result.warnings)
+        # Warning message says "hanya 3 hari" (from recommendation_service._build_warnings)
+        assert any(w.level == "high" and "hari" in w.message for w in result.warnings)
 
     def test_sufficient_data_no_shortage_warning(self):
         req = make_request(n=10, horizon=3)
         result = run_forecast(req)
-        assert not any("kurang dari 7 hari" in w for w in result.warnings)
+        # n=10 → medium warning (< 14), not a high data-shortage warning
+        assert not any(w.level == "high" and "hanya" in w.message for w in result.warnings)
 
     def test_holiday_increases_prediction(self):
         """A holiday on the prediction day must raise predicted_qty vs no-holiday baseline."""

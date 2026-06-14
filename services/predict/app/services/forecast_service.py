@@ -12,6 +12,7 @@ External factor adjustments (applied on top of baseline):
   rainy / stormy day   → -10%
 
 Accuracy is estimated via a simple 80/20 walk-forward backtest.
+Insight generation (summary / recommendations / warnings) is delegated to recommendation_service.
 """
 
 import logging
@@ -29,10 +30,11 @@ from app.schemas.prediction import (
     PredictionRequest,
     PredictionResponse,
 )
+from app.services.recommendation_service import ForecastContext, generate_insights
 
 logger = logging.getLogger(__name__)
 
-# Optional heavy deps — imported at module level so tests can patch them cleanly.
+# Optional heavy deps — module-level so tests can patch them cleanly.
 try:
     from statsmodels.tsa.arima.model import ARIMA as _ARIMA
 
@@ -109,7 +111,8 @@ def _forecast_prophet(
         logger.warning("Prophet not available, falling back to WMA")
         return _forecast_wma(qty, horizon)
     try:
-        import pandas as pd  # pandas is always available with prophet
+        import pandas as pd
+        import warnings
 
         df = pd.DataFrame({"ds": pd.to_datetime(dates), "y": qty})
         m = _Prophet(
@@ -117,11 +120,8 @@ def _forecast_prophet(
             weekly_seasonality=len(qty) >= 7,
             yearly_seasonality=False,
             interval_width=0.8,
-            # Silence noisy Stan output
             stan_backend="CMDSTANPY",
         )
-        import warnings
-
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             m.fit(df)
@@ -236,58 +236,6 @@ def _to_level(confidence: float) -> Literal["low", "medium", "high"]:
     return "low"
 
 
-# ── Summary & recommendations ─────────────────────────────────────────────────
-
-
-def _build_summary(method: MethodName, n: int, mape: float, has_warnings: bool) -> str:
-    label = {"arima": "ARIMA", "prophet": "Prophet", "wma": "Rata-rata Berbobot (WMA)"}[method]
-    quality = (
-        "cukup akurat" if mape < 15 else ("perlu diperhatikan" if mape < 30 else "perkiraan kasar")
-    )
-    summary = (
-        f"Prediksi menggunakan metode {label} berdasarkan {n} hari data historis. "
-        f"Backtesting menunjukkan MAPE {mape:.1f}% — hasil {quality}."
-    )
-    if has_warnings:
-        summary += " Harap perhatikan peringatan yang tersedia."
-    return summary
-
-
-def _build_recommendations(
-    n: int,
-    mape: float,
-    adjustment_map: dict[date, float],
-) -> list[str]:
-    recs: list[str] = []
-
-    if n < 14:
-        recs.append(
-            "Kumpulkan minimal 14 hari data historis agar prediksi lebih akurat."
-        )
-    elif mape > 25:
-        recs.append(
-            "MAPE tinggi — pastikan data historis bersih dan tidak ada anomali transaksi."
-        )
-
-    boost_days = sum(1 for v in adjustment_map.values() if v > 1.0)
-    if boost_days:
-        recs.append(
-            f"Ada {boost_days} hari dengan potensi peningkatan penjualan (libur/event) — "
-            "siapkan stok lebih untuk mengantisipasi lonjakan."
-        )
-
-    slow_days = sum(1 for v in adjustment_map.values() if v < 1.0)
-    if slow_days:
-        recs.append(
-            f"Ada {slow_days} hari perkiraan hujan — pertimbangkan promosi khusus."
-        )
-
-    if not recs:
-        recs.append("Kondisi prediksi stabil — pertahankan manajemen stok dan harga saat ini.")
-
-    return recs
-
-
 # ── Public entry point ────────────────────────────────────────────────────────
 
 
@@ -295,14 +243,7 @@ def run_forecast(req: PredictionRequest) -> PredictionResponse:
     data = req.historical_data
     n = len(data)
     dates, qty, _ = _build_series(data)
-    avg_price = _avg_price(data)
-
-    warnings_out: list[str] = []
-    if n < 7:
-        warnings_out.append(
-            "Data historis kurang dari 7 hari — prediksi merupakan estimasi kasar "
-            "dan mungkin tidak andal."
-        )
+    price = _avg_price(data)
 
     method = _select_method(n)
 
@@ -334,7 +275,7 @@ def run_forecast(req: PredictionRequest) -> PredictionResponse:
     for i, d in enumerate(pred_dates):
         mult = adjustment_map[d]
         adj_qty = max(0, round(float(baseline[i]) * mult))
-        adj_revenue = Decimal(str(round(adj_qty * avg_price, 2)))
+        adj_revenue = Decimal(str(round(adj_qty * price, 2)))
         predictions.append(
             PredictionPoint(
                 date=d,
@@ -345,14 +286,26 @@ def run_forecast(req: PredictionRequest) -> PredictionResponse:
             )
         )
 
-    return PredictionResponse(
+    # Delegate all insight generation to recommendation_service
+    ctx = ForecastContext(
+        product_id=req.product_id,
+        historical_data=data,
         predictions=predictions,
         accuracy_metrics=AccuracyMetrics(
             method=method,
             mae=round(mae, 2),
             mape=round(mape, 2),
         ),
-        ai_summary=_build_summary(method, n, mape, bool(warnings_out)),
-        recommendations=_build_recommendations(n, mape, adjustment_map),
-        warnings=warnings_out,
+        external_factors=req.external_factors,
+        adjustment_map=adjustment_map,
+        avg_price=price,
+    )
+    summary, recommendations, warnings = generate_insights(ctx)
+
+    return PredictionResponse(
+        predictions=predictions,
+        accuracy_metrics=ctx.accuracy_metrics,
+        ai_summary=summary,
+        recommendations=recommendations,
+        warnings=warnings,
     )
