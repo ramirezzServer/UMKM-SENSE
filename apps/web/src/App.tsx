@@ -19,6 +19,7 @@ const ResetPasswordPage = lazy(() => import('@/routes/reset-password'));
 const DashboardPage = lazy(() => import('@/routes/dashboard'));
 const ProductsPage = lazy(() => import('@/routes/products'));
 const SalesPage = lazy(() => import('@/routes/sales'));
+const AnalyticsPage = lazy(() => import('@/routes/analytics'));
 
 // ─── Scroll restoration ───────────────────────────────────────────────────────
 
@@ -119,6 +120,14 @@ const router = createBrowserRouter([
                 element: (
                   <Suspense fallback={<PageFallback />}>
                     <ProductsPage />
+                  </Suspense>
+                ),
+              },
+              {
+                path: '/analytics',
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <AnalyticsPage />
                   </Suspense>
                 ),
               },

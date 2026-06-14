@@ -46,6 +46,12 @@ export function prefetchRoute(qc: QueryClient, path: string): void {
       });
       break;
 
-    // Future routes can be added here
+    case '/analytics':
+      void qc.prefetchQuery({
+        queryKey: SALES_KEYS.selectProducts,
+        queryFn: salesApi.getSelectProducts,
+        staleTime: 2 * 60 * 1000,
+      });
+      break;
   }
 }
