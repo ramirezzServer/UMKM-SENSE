@@ -7,6 +7,8 @@
     "build": "vite build",
     "dev": "vite",
     "dev:server": "php artisan serve",
+    "dev:worker": "php artisan queue:work --tries=3 --backoff=30 --sleep=3 --queue=default",
+    "dev:predict": "cd ../../services/predict && .venv/Scripts/uvicorn app.main:app --reload --port 8001",
     "lint": "php vendor/bin/pint --test",
     "format": "php vendor/bin/pint"
   },

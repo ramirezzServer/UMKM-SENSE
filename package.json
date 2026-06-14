@@ -12,7 +12,8 @@
     "prepare": "husky",
     "dev:api": "pnpm --filter api run dev:server",
     "dev:web": "pnpm --filter web dev",
-    "dev:all": "concurrently --names \"API,WEB\" --prefix-colors \"cyan,green\" \"pnpm run dev:api\" \"pnpm run dev:web\""
+    "dev:worker": "pnpm --filter api run dev:worker",
+    "dev:all": "concurrently --names \"API,WEB,WORKER,PREDICT\" --prefix-colors \"cyan,green,yellow,magenta\" \"pnpm run dev:api\" \"pnpm run dev:web\" \"pnpm run dev:worker\" \"pnpm --filter api run dev:predict\""
   },
   "devDependencies": {
     "concurrently": "^9.0.1",

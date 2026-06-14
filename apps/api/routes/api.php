@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\PredictionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
@@ -61,5 +62,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/trend', [DashboardController::class, 'trend']);
         Route::get('/top-products', [DashboardController::class, 'topProducts']);
         Route::get('/conditions', [DashboardController::class, 'conditions']);
+    });
+
+    // Prediction — async, server-to-server with FastAPI microservice
+    Route::middleware('throttle:predictions')->group(function () {
+        Route::post('/predictions', [PredictionController::class, 'store']);
+        Route::get('/predictions/{id}/status', [PredictionController::class, 'status']);
     });
 });

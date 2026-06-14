@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // FastAPI prediction microservice (services/predict)
+    'predict' => [
+        'url' => env('PREDICT_SERVICE_URL', 'http://localhost:8001'),
+        'key' => env('PREDICT_INTERNAL_KEY', ''),
+        'timeout' => env('PREDICT_TIMEOUT', 30),
+    ],
+
 ];

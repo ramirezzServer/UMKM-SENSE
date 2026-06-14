@@ -63,5 +63,18 @@ class AppServiceProvider extends ServiceProvider
                     ], 429, $headers);
                 });
         });
+
+        // Predictions: 10 permintaan/jam per user (anti-abuse komputasi berat)
+        RateLimiter::for('predictions', function (Request $request) {
+            return Limit::perHour(10)
+                ->by($request->user()?->id ?: $request->ip())
+                ->response(function (Request $request, array $headers) {
+                    $retryAfter = $headers['Retry-After'] ?? 3600;
+
+                    return response()->json([
+                        'message' => "Batas permintaan prediksi tercapai. Coba lagi dalam {$retryAfter} detik.",
+                    ], 429, $headers);
+                });
+        });
     }
 }
