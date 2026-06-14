@@ -6,6 +6,7 @@ export const DASHBOARD_KEYS = {
   trend: (days: number) => ['dashboard', 'trend', days] as const,
   topProducts: (days: number, limit: number) => ['dashboard', 'top-products', days, limit] as const,
   conditions: ['dashboard', 'conditions'] as const,
+  tomorrowPrediction: ['dashboard', 'tomorrow-prediction'] as const,
 };
 
 const TWO_MINUTES = 2 * 60 * 1000;
@@ -39,6 +40,14 @@ export function useConditions() {
   return useQuery({
     queryKey: DASHBOARD_KEYS.conditions,
     queryFn: dashboardApi.getConditions,
+    staleTime: TEN_MINUTES,
+  });
+}
+
+export function useTomorrowPrediction() {
+  return useQuery({
+    queryKey: DASHBOARD_KEYS.tomorrowPrediction,
+    queryFn: dashboardApi.getTomorrowPrediction,
     staleTime: TEN_MINUTES,
   });
 }

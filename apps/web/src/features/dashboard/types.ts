@@ -49,3 +49,18 @@ export interface DashboardConditions {
   cuaca: WeatherCondition | null;
   events: HolidayEvent[];
 }
+
+export type TomorrowPrediction =
+  | { has_prediction: false }
+  | {
+      has_prediction: true;
+      prediction_log_id: number;
+      product_id: number;
+      predicted_revenue: number;
+      predicted_qty: number;
+      confidence: number;
+      level: 'low' | 'medium' | 'high';
+      forecast_method: string;
+      mape: number;
+      top_recommendation: { priority: 'high' | 'medium' | 'low'; title: string } | null;
+    };

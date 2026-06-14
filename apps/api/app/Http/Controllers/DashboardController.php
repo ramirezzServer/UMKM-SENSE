@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\TransactionStatus;
+use App\Models\PredictionLog;
 use App\Services\HolidayService;
 use App\Services\WeatherService;
 use Illuminate\Http\JsonResponse;
@@ -203,6 +204,62 @@ class DashboardController extends Controller
             'data' => [
                 'cuaca' => $weather,
                 'events' => $events,
+            ],
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // GET /dashboard/tomorrow-prediction
+    // -------------------------------------------------------------------------
+
+    public function tomorrowPrediction(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $tomorrow = now()->addDay()->format('Y-m-d');
+
+        // Find the latest completed prediction that covers tomorrow's date.
+        // We never run heavy forecasting here — only read what the job already stored.
+        $log = PredictionLog::where('user_id', $userId)
+            ->where('status', 'done')
+            ->whereDate('prediction_start', '<=', $tomorrow)
+            ->whereDate('prediction_end', '>=', $tomorrow)
+            ->with(['items', 'recommendations'])
+            ->latest('updated_at')
+            ->first();
+
+        if (! $log) {
+            return response()->json(['data' => ['has_prediction' => false]]);
+        }
+
+        $item = $log->items->first(
+            fn ($i) => Carbon::parse($i->date)->format('Y-m-d') === $tomorrow
+        );
+
+        if (! $item) {
+            return response()->json(['data' => ['has_prediction' => false]]);
+        }
+
+        // Sort recommendations high → medium → low in PHP (avoids driver-specific SQL)
+        $priorityOrder = ['high' => 0, 'medium' => 1, 'low' => 2];
+        $topRec = $log->recommendations
+            ->sortBy(fn ($r) => $priorityOrder[$r->priority] ?? 9)
+            ->first();
+
+        return response()->json([
+            'data' => [
+                'has_prediction' => true,
+                'prediction_log_id' => $log->id,
+                'product_id' => $log->product_id,
+                'predicted_revenue' => round((float) $item->predicted_revenue, 2),
+                'predicted_qty' => (int) $item->predicted_qty,
+                'confidence' => (float) $item->confidence,
+                'level' => $item->level,
+                'forecast_method' => $log->forecast_method,
+                'mape' => (float) $log->mape,
+                'top_recommendation' => $topRec ? [
+                    'priority' => $topRec->priority,
+                    'title' => $topRec->title,
+                ] : null,
             ],
         ]);
     }

@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/hooks';
 import SummarySection from '@/features/dashboard/SummarySection';
 import TopProductsSection from '@/features/dashboard/TopProductsSection';
 import ConditionsPanel from '@/features/dashboard/ConditionsPanel';
+import TomorrowPredictionCard from '@/features/dashboard/TomorrowPredictionCard';
 import TrendChartSkeleton from '@/features/dashboard/TrendChartSkeleton';
 
 // Chart is code-split — heavy Recharts bundle loads separately
@@ -63,7 +64,7 @@ export default function DashboardPage() {
         <SummarySection />
       </Section>
 
-      {/* Chart (2/3) + conditions panel (1/3) */}
+      {/* Chart (2/3) + right column (1/3): conditions + tomorrow prediction */}
       <div className="grid gap-6 lg:grid-cols-3">
         <Section order={1} className="lg:col-span-2">
           <Suspense fallback={<TrendChartSkeleton />}>
@@ -71,13 +72,18 @@ export default function DashboardPage() {
           </Suspense>
         </Section>
 
-        <Section order={2}>
-          <ConditionsPanel />
-        </Section>
+        <div className="flex flex-col gap-6">
+          <Section order={2}>
+            <ConditionsPanel />
+          </Section>
+          <Section order={3}>
+            <TomorrowPredictionCard />
+          </Section>
+        </div>
       </div>
 
       {/* Top products */}
-      <Section order={3}>
+      <Section order={4}>
         <TopProductsSection days={7} limit={5} />
       </Section>
     </div>

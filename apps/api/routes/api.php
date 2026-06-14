@@ -62,6 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/trend', [DashboardController::class, 'trend']);
         Route::get('/top-products', [DashboardController::class, 'topProducts']);
         Route::get('/conditions', [DashboardController::class, 'conditions']);
+        Route::get('/tomorrow-prediction', [DashboardController::class, 'tomorrowPrediction']);
     });
 
     // Prediction — async, server-to-server with FastAPI microservice

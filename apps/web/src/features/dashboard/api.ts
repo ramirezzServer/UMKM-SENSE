@@ -1,5 +1,11 @@
 import api from '@/lib/api';
-import type { DashboardConditions, DashboardSummary, TopProduct, TrendDay } from './types';
+import type {
+  DashboardConditions,
+  DashboardSummary,
+  TopProduct,
+  TomorrowPrediction,
+  TrendDay,
+} from './types';
 
 export async function getSummary(): Promise<DashboardSummary> {
   const { data } = await api.get<{ data: DashboardSummary }>('/api/dashboard/summary');
@@ -22,5 +28,12 @@ export async function getTopProducts(days = 7, limit = 5): Promise<TopProduct[]>
 
 export async function getConditions(): Promise<DashboardConditions> {
   const { data } = await api.get<{ data: DashboardConditions }>('/api/dashboard/conditions');
+  return data.data;
+}
+
+export async function getTomorrowPrediction(): Promise<TomorrowPrediction> {
+  const { data } = await api.get<{ data: TomorrowPrediction }>(
+    '/api/dashboard/tomorrow-prediction'
+  );
   return data.data;
 }

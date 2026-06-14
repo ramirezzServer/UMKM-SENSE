@@ -30,6 +30,10 @@ export function prefetchRoute(qc: QueryClient, path: string): void {
         queryKey: DASHBOARD_KEYS.conditions,
         queryFn: dashboardApi.getConditions,
       });
+      void qc.prefetchQuery({
+        queryKey: DASHBOARD_KEYS.tomorrowPrediction,
+        queryFn: dashboardApi.getTomorrowPrediction,
+      });
       break;
 
     case '/products':

@@ -4,17 +4,7 @@ Platform analitik dan prediksi penjualan untuk UMKM Indonesia. Bantu pelaku usah
 
 ---
 
-## Apa ini?
-
-UMKM-Sense adalah web app yang memungkinkan UMKM untuk:
-
-- Melacak dan memvisualisasikan data penjualan secara real-time
-- Mendapatkan prediksi tren penjualan ke depan
-- Membaca insight bisnis yang actionable tanpa perlu paham statistik
-
----
-
-## Struktur Monorepo
+## Arsitektur
 
 ```
 umkm-sense/
@@ -23,223 +13,266 @@ umkm-sense/
 │   └── api/          → Backend REST API (Laravel 11)
 ├── services/
 │   └── predict/      → Microservice prediksi penjualan (Python FastAPI)
-├── packages/         → Shared packages (types, utils, dll — akan diisi nanti)
-├── turbo.json        → Konfigurasi Turborepo
+├── docker-compose.yml  → PostgreSQL + Redis
+├── turbo.json
 ├── pnpm-workspace.yaml
 └── package.json
 ```
 
----
-
 ## Tech Stack
 
-| Layer       | Teknologi                   |
-| ----------- | --------------------------- |
-| Frontend    | React 19, Vite, TypeScript  |
-| Backend API | Laravel 11, PHP 8.3+        |
-| Prediksi    | Python 3.12+, FastAPI       |
-| Database    | PostgreSQL                  |
-| Cache/Queue | Redis                       |
-| Monorepo    | Turborepo + pnpm workspaces |
+| Layer         | Teknologi                                                 |
+| ------------- | --------------------------------------------------------- |
+| Frontend      | React 19, Vite, TypeScript, TanStack Query, Framer Motion |
+| Backend API   | Laravel 11, PHP 8.2+, Sanctum, Queue (Redis)              |
+| Prediksi AI   | Python 3.10+, FastAPI, ARIMA / Prophet / WMA              |
+| Database      | PostgreSQL 16                                             |
+| Cache / Queue | Redis 7                                                   |
+| Monorepo      | Turborepo + pnpm workspaces                               |
 
 ---
 
 ## Prasyarat
 
-Sebelum mulai, pastikan sudah terpasang:
-
-- **Node.js** v20+ (cek: `node -v`) — disarankan pakai [nvm](https://github.com/nvm-sh/nvm)
-- **pnpm** v9+ (cek: `pnpm -v`) — install via `npm install -g pnpm`
-- **PHP** 8.2+ dan **Composer** (untuk apps/api)
-- **Python** 3.12+ (untuk services/predict nanti)
-- **Docker** & **Docker Compose** v2+ — untuk menjalankan PostgreSQL dan Redis lokal
+| Tool           | Versi minimum         |
+| -------------- | --------------------- |
+| Node.js        | 20.x                  |
+| pnpm           | 9.x (`npm i -g pnpm`) |
+| PHP            | 8.2+                  |
+| Composer       | 2.x                   |
+| Python         | 3.10+                 |
+| Docker Desktop | terbaru               |
 
 ---
 
-## Menjalankan Database Lokal
+## Setup Pertama Kali
 
-PostgreSQL dan Redis dijalankan via Docker Compose. Tidak perlu install dua-duanya secara manual di host.
-
-### Setup pertama kali
+### 1. Infrastruktur (PostgreSQL + Redis via Docker)
 
 ```bash
-# Salin template env untuk docker compose
-cp .env.example .env
-
-# Edit .env dan ganti POSTGRES_PASSWORD dengan password pilihan kamu
-# (POSTGRES_USER dan POSTGRES_DB boleh dibiarkan default)
-```
-
-### Nyalakan service
-
-```bash
-# Jalankan di background
+cp .env.example .env          # sesuaikan POSTGRES_* jika perlu
 docker compose up -d
-
-# Cek status — semua service harus "healthy"
-docker compose ps
+docker compose ps             # pastikan semua "healthy"
 ```
 
-Output yang diharapkan:
-
-```
-NAME                IMAGE                STATUS
-umkm-sense-postgres-1   postgres:16-alpine   Up (healthy)
-umkm-sense-redis-1      redis:7-alpine       Up (healthy)
-```
-
-### Cek koneksi manual (opsional)
-
-```bash
-# Masuk ke psql
-docker compose exec postgres psql -U umkm -d umkm_sense
-
-# Ping Redis
-docker compose exec redis redis-cli ping
-# Output: PONG
-```
-
-### Matikan service
-
-```bash
-docker compose down          # Matikan container, volume tetap ada
-docker compose down -v       # Matikan + hapus semua data (hati-hati!)
-```
-
-### Koneksi ke Laravel
-
-Setelah service jalan, setup Laravel dengan:
+### 2. Laravel API
 
 ```bash
 cd apps/api
-cp .env.example .env
-# Pastikan nilai DB_* dan REDIS_* di apps/api/.env cocok dengan root .env
+cp .env.example .env          # lihat bagian Variabel Lingkungan di bawah
+composer install
 php artisan key:generate
-php artisan migrate
+php artisan migrate --seed
 ```
 
-Nilai default sudah dikonfigurasi menunjuk ke `127.0.0.1:5432` (PostgreSQL) dan `127.0.0.1:6379` (Redis) — sama persis dengan port yang di-expose docker compose.
-
----
-
-## Cara Install
-
-Clone dulu, lalu install semua dependensi Node sekaligus dari root:
+Seed data demo + cuaca (opsional tapi disarankan):
 
 ```bash
-git clone <repo-url>
-cd umkm-sense
-
-# Pakai versi Node yang benar (kalau pakai nvm)
-nvm use
-
-# Install semua dependencies
-pnpm install
-```
-
----
-
-## Menjalankan & Melihat Aplikasi (Mode Lokal — SQLite)
-
-> Setup cepat tanpa Docker: Laravel dikonfigurasi menggunakan **SQLite** untuk development lokal.
-
-### Langkah berurutan (pertama kali)
-
-```bash
-# 1. Install semua dependensi JS
-pnpm install
-
-# 2. Install dependensi PHP
-cd apps/api && composer install && cd ../..
-
-# 3. Konfigurasi env Laravel (sudah ada — SQLite, tidak perlu diubah)
-cd apps/api
-php artisan key:generate
-cd ../..
-
-# 4. Buat database, jalankan migrasi, seed data district
-cd apps/api
-php artisan migrate:fresh --seed
-cd ../..
-
-# 5. Seed akun demo dengan data penjualan realistis 30 hari
-cd apps/api
 php artisan db:seed --class=DemoSeeder
-cd ../..
-
-# 6. Sinkronisasi data cuaca untuk kecamatan akun demo
-cd apps/api
 php artisan weather:sync
-cd ../..
-
-# 7. Jalankan frontend + backend bersamaan
-pnpm dev:all
 ```
 
-Buka **[http://localhost:5173](http://localhost:5173)** dan login:
+Login demo: `demo@umkm.test` / `password`
 
-| Field    | Nilai            |
-| -------- | ---------------- |
-| Email    | `demo@umkm.test` |
-| Password | `password`       |
+### 3. Frontend Web
 
-Dashboard langsung menampilkan data — ringkasan hari ini, grafik tren 7 hari, produk terlaris (Kopi Hitam, Nasi Goreng Spesial, dll.), dan kondisi cuaca.
+```bash
+# Dari root monorepo:
+pnpm install
+cd apps/web
+cp .env.example .env          # biasanya tidak perlu diubah untuk dev
+```
+
+### 4. FastAPI Prediction Service
+
+```bash
+cd services/predict
+cp .env.example .env          # isi INTERNAL_API_KEY (lihat catatan di bawah)
+
+python -m venv .venv
+
+# Windows:
+.venv\Scripts\activate
+# macOS / Linux:
+source .venv/bin/activate
+
+pip install -r requirements.txt
+```
 
 ---
 
-### Urutan singkat (setelah install pertama kali)
+## Menjalankan Semua Service Sekaligus
+
+Dari **root** monorepo:
 
 ```bash
-cd apps/api && php artisan migrate:fresh --seed && php artisan db:seed --class=DemoSeeder && php artisan weather:sync && cd ../..
-pnpm dev:all
+pnpm run dev:all
+```
+
+Perintah ini menjalankan **4 service secara paralel** via `concurrently`:
+
+| Label     | Service                                 | URL                   |
+| --------- | --------------------------------------- | --------------------- |
+| `API`     | Laravel (`php artisan serve`)           | http://localhost:8000 |
+| `WEB`     | Vite dev server                         | http://localhost:5173 |
+| `WORKER`  | Queue worker (`php artisan queue:work`) | —                     |
+| `PREDICT` | FastAPI via uvicorn                     | http://localhost:8001 |
+
+Buka **http://localhost:5173** di browser.
+
+> **Windows**: script `dev:predict` menggunakan `.venv/Scripts/uvicorn`. Pastikan virtual env sudah dibuat di `services/predict/.venv/`.
+
+### Menjalankan Service Secara Terpisah
+
+```bash
+pnpm run dev:api                    # hanya Laravel API (port 8000)
+pnpm run dev:web                    # hanya Vite frontend (port 5173)
+pnpm run dev:worker                 # hanya queue worker
+pnpm --filter api run dev:predict   # hanya FastAPI (port 8001)
 ```
 
 ---
 
-### Perintah dev berguna
+## Variabel Lingkungan
+
+### `apps/api/.env` — variabel penting
+
+```dotenv
+# Database (harus cocok dengan docker-compose .env di root)
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=umkm_sense
+DB_USERNAME=umkm
+DB_PASSWORD=rahasia
+
+# Queue & Cache — Redis harus jalan via Docker
+QUEUE_CONNECTION=redis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+
+# Sanctum — izinkan SPA dev server (port 5173)
+SANCTUM_STATEFUL_DOMAINS=localhost,localhost:5173,127.0.0.1,127.0.0.1:5173
+SESSION_DOMAIN=localhost
+
+# FastAPI Prediction Microservice
+# ⚠️  PREDICT_INTERNAL_KEY harus SAMA PERSIS dengan INTERNAL_API_KEY di services/predict/.env
+PREDICT_SERVICE_URL=http://localhost:8001
+PREDICT_INTERNAL_KEY=ganti-dengan-secret-yang-kuat
+PREDICT_TIMEOUT=30
+```
+
+### `services/predict/.env` — variabel penting
+
+```dotenv
+# ⚠️  Harus SAMA PERSIS dengan PREDICT_INTERNAL_KEY di apps/api/.env
+INTERNAL_API_KEY=ganti-dengan-secret-yang-kuat
+PORT=8001
+```
+
+### `apps/web/.env` — variabel penting
+
+```dotenv
+# Kosongkan untuk dev — Vite proxy otomatis ke localhost:8000
+# Isi jika frontend dan backend di-deploy ke domain berbeda
+VITE_API_URL=
+```
+
+> **Penting**: `PREDICT_INTERNAL_KEY` dan `INTERNAL_API_KEY` adalah **shared secret** untuk komunikasi server-to-server antara Laravel dan FastAPI. Nilai keduanya harus identik.
+
+---
+
+## Alur End-to-End: Prediksi Penjualan
+
+Pastikan **semua 4 service berjalan** (`pnpm run dev:all`), lalu:
+
+1. Buka **http://localhost:5173** → login
+2. **Tambah produk** → `/products`
+3. **Tambah transaksi** (minimal 7 hari historis untuk prediksi) → `/sales`
+4. **Analisis Cerdas** → `/analytics`
+5. Pilih produk + periode (maks 14 hari) → **Analisis Sekarang**
+6. Sistem mengirim HTTP 202 (async) → queue worker mengambil job
+7. Worker memanggil FastAPI → menghitung ARIMA / Prophet / WMA
+8. Hasil disimpan ke DB → status berubah `done`
+9. Frontend polling otomatis setiap 2 detik → hasil tampil (3 tab: Ringkasan, Prediksi, Rekomendasi)
+10. Kembali ke **Dashboard** → kartu **"Prediksi Besok"** otomatis terisi dari data yang sudah ada di DB
+
+---
+
+## Testing
+
+### Laravel
 
 ```bash
-pnpm dev:all              # Frontend + Backend bersamaan
-pnpm dev:web              # Hanya frontend (port 5173)
-pnpm dev:api              # Hanya backend (port 8000)
+cd apps/api
+php artisan test                                          # semua test
+php artisan test --filter="PredictionTest"                # endpoint predictions
+php artisan test --filter="RunPredictionJobTest"          # job async
+```
 
-pnpm --filter web build   # Build production frontend
+### FastAPI (Python)
+
+```bash
+cd services/predict
+# aktifkan venv dulu
+pytest                   # 80 unit tests (forecast + recommendation)
+pytest -v --tb=short     # verbose
+```
+
+### Frontend (TypeScript + build check)
+
+```bash
+pnpm --filter web build
+```
+
+---
+
+## Perintah Berguna
+
+```bash
+# Root monorepo
+pnpm dev:all              # Semua 4 service bersamaan (dev)
+pnpm --filter web build   # Build produksi frontend + type-check
 pnpm test                 # Semua test
 
-# Di apps/api:
-php artisan test                          # Jalankan semua feature test
-php artisan db:seed --class=DemoSeeder    # Re-seed demo (idempotent)
-php artisan weather:sync                  # Sinkronisasi cuaca manual
-```
+# apps/api
+php artisan test
+php artisan db:seed --class=DemoSeeder   # Re-seed demo (idempotent)
+php artisan weather:sync                  # Sinkronisasi data cuaca
 
-> **Catatan `dev:all`**: Menjalankan `php artisan serve` (port 8000) dan Vite (port 5173) secara bersamaan via `concurrently`. Jika ingin memisahkan, buka dua terminal dan jalankan `pnpm dev:api` + `pnpm dev:web` masing-masing.
-
----
-
-## Cara Run (Mode Turbo — semua workspace)
-
-```bash
-# Jalankan semua apps sekaligus (development mode)
-pnpm dev
-
-# Atau spesifik per app
-pnpm --filter web dev
-pnpm --filter api dev
-```
-
-### Pipeline lain yang tersedia
-
-```bash
-pnpm build    # Build semua apps
-pnpm lint     # Lint semua apps
-pnpm test     # Jalankan semua test
+# services/predict
+pytest -v
+uvicorn app.main:app --reload --port 8001   # manual start
 ```
 
 ---
 
-## Kontribusi
+## Troubleshooting
 
-Masih fase awal. Struktur dan konvensi kode akan didokumentasikan lebih lanjut seiring perkembangan proyek.
+| Masalah                               | Solusi                                                                                                   |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `CSRF mismatch 419`                   | Pastikan `SANCTUM_STATEFUL_DOMAINS` di `apps/api/.env` menyertakan `localhost:5173`                      |
+| FastAPI tidak bisa dipanggil          | Cek `PREDICT_SERVICE_URL=http://localhost:8001` di `apps/api/.env` dan pastikan service predict berjalan |
+| Job tidak diproses                    | Pastikan `QUEUE_CONNECTION=redis` dan `dev:worker` sedang berjalan; cek Redis jalan via Docker           |
+| "Tidak ada data historis"             | Tambah minimal 1 transaksi sukses untuk produk tersebut di `/sales`                                      |
+| `Connection refused` Redis/PostgreSQL | Jalankan `docker compose up -d` dari root                                                                |
+| Python `ModuleNotFoundError`          | Aktifkan virtual env (`source .venv/bin/activate`) lalu `pip install -r requirements.txt`                |
+| `dev:predict` gagal di Windows        | Pastikan `.venv\Scripts\uvicorn.exe` ada; jika tidak, coba `pip install uvicorn` ulang dalam venv        |
+
+---
+
+## Struktur Database Utama
+
+| Tabel                        | Deskripsi                                                           |
+| ---------------------------- | ------------------------------------------------------------------- |
+| `prediction_logs`            | Log prediksi per user/produk (`pending → processing → done/failed`) |
+| `prediction_items`           | Hasil prediksi per hari (qty, revenue, confidence)                  |
+| `prediction_recommendations` | Rekomendasi berprioritas dari mesin AI                              |
+| `prediction_warnings`        | Peringatan (data kurang, confidence rendah, dll)                    |
+| `calendar_events`            | Event lokal yang mempengaruhi prediksi (impact: high/medium/low)    |
+| `transactions`               | Data penjualan historis                                             |
+| `transaction_items`          | Detail item per transaksi                                           |
+| `products`                   | Katalog produk user                                                 |
 
 ---
 
