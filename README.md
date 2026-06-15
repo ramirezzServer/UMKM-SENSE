@@ -120,7 +120,7 @@ Perintah ini menjalankan **4 service secara paralel** via `concurrently`:
 
 Buka **http://localhost:5173** di browser.
 
-> **Windows**: script `dev:predict` menggunakan `.venv/Scripts/uvicorn`. Pastikan virtual env sudah dibuat di `services/predict/.venv/`.
+> **Windows**: `pnpm run dev:all` sudah menggunakan `python.exe -m uvicorn` sehingga bekerja tanpa konfigurasi tambahan. Pastikan virtual env sudah dibuat (`python -m venv .venv`) dan dependensi sudah terinstall (`pip install -r requirements.txt`) di `services/predict/`.
 
 ### Menjalankan Service Secara Terpisah
 
@@ -129,6 +129,14 @@ pnpm run dev:api                    # hanya Laravel API (port 8000)
 pnpm run dev:web                    # hanya Vite frontend (port 5173)
 pnpm run dev:worker                 # hanya queue worker
 pnpm --filter api run dev:predict   # hanya FastAPI (port 8001)
+```
+
+**Fallback manual Windows** (jika `pnpm --filter api run dev:predict` masih bermasalah):
+
+```cmd
+cd services/predict
+.venv\Scripts\activate
+uvicorn app.main:app --reload --port 8001
 ```
 
 ---
@@ -249,15 +257,15 @@ uvicorn app.main:app --reload --port 8001   # manual start
 
 ## Troubleshooting
 
-| Masalah                               | Solusi                                                                                                   |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `CSRF mismatch 419`                   | Pastikan `SANCTUM_STATEFUL_DOMAINS` di `apps/api/.env` menyertakan `localhost:5173`                      |
-| FastAPI tidak bisa dipanggil          | Cek `PREDICT_SERVICE_URL=http://localhost:8001` di `apps/api/.env` dan pastikan service predict berjalan |
-| Job tidak diproses                    | Pastikan `QUEUE_CONNECTION=redis` dan `dev:worker` sedang berjalan; cek Redis jalan via Docker           |
-| "Tidak ada data historis"             | Tambah minimal 1 transaksi sukses untuk produk tersebut di `/sales`                                      |
-| `Connection refused` Redis/PostgreSQL | Jalankan `docker compose up -d` dari root                                                                |
-| Python `ModuleNotFoundError`          | Aktifkan virtual env (`source .venv/bin/activate`) lalu `pip install -r requirements.txt`                |
-| `dev:predict` gagal di Windows        | Pastikan `.venv\Scripts\uvicorn.exe` ada; jika tidak, coba `pip install uvicorn` ulang dalam venv        |
+| Masalah                               | Solusi                                                                                                                                                                        |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CSRF mismatch 419`                   | Pastikan `SANCTUM_STATEFUL_DOMAINS` di `apps/api/.env` menyertakan `localhost:5173`                                                                                           |
+| FastAPI tidak bisa dipanggil          | Cek `PREDICT_SERVICE_URL=http://localhost:8001` di `apps/api/.env` dan pastikan service predict berjalan                                                                      |
+| Job tidak diproses                    | Pastikan `QUEUE_CONNECTION=redis` dan `dev:worker` sedang berjalan; cek Redis jalan via Docker                                                                                |
+| "Tidak ada data historis"             | Tambah minimal 1 transaksi sukses untuk produk tersebut di `/sales`                                                                                                           |
+| `Connection refused` Redis/PostgreSQL | Jalankan `docker compose up -d` dari root                                                                                                                                     |
+| Python `ModuleNotFoundError`          | Aktifkan virtual env (`source .venv/bin/activate`) lalu `pip install -r requirements.txt`                                                                                     |
+| `dev:predict` gagal di Windows        | Pastikan venv sudah dibuat dan `pip install -r requirements.txt` sudah dijalankan. Fallback manual: `.venv\Scripts\activate` lalu `uvicorn app.main:app --reload --port 8001` |
 
 ---
 
