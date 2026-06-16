@@ -19,17 +19,29 @@ class HolidayService
 
     /**
      * Returns all national holidays for the given year.
-     * Cache-first → DB-first → API → graceful empty on failure.
+     * Strategy: cache → DB → API (best-effort) → graceful empty.
+     *
+     * Empty results are never cached so that a newly seeded DB is picked up
+     * on the very next request without needing a cache flush.
      */
     public function getHolidays(int $year): array
     {
         $cacheKey = "holidays:year:{$year}";
 
+        // Non-empty cache hit → serve immediately
         if (Cache::has($cacheKey)) {
-            return Cache::get($cacheKey);
+            $cached = Cache::get($cacheKey);
+
+            if (! empty($cached)) {
+                return $cached;
+            }
+
+            // Stale empty cache (e.g. from a failed API call that was cached
+            // before this fix) — invalidate so seeder/DB data is picked up.
+            Cache::forget($cacheKey);
         }
 
-        // DB already has data for this year — skip API call
+        // DB already has rows — skip API entirely
         if (NationalHoliday::where('year', $year)->exists()) {
             $holidays = $this->loadFromDb($year);
             Cache::put($cacheKey, $holidays, now()->addDays(self::CACHE_TTL_DAYS));
@@ -37,18 +49,29 @@ class HolidayService
             return $holidays;
         }
 
+        // Try external API (best-effort — may be unavailable)
         $fetched = $this->fetchFromApi($year);
 
-        if ($fetched !== null) {
-            $this->persistToDb($year, $fetched);
+        if (! empty($fetched)) {
+            $this->persistToDb($fetched);
             $holidays = $this->loadFromDb($year);
             Cache::put($cacheKey, $holidays, now()->addDays(self::CACHE_TTL_DAYS));
 
             return $holidays;
         }
 
-        // API failed — return whatever is in DB (may be empty)
-        return $this->loadFromDb($year);
+        // API unavailable or returned nothing — fall back to whatever is in DB
+        // (seeder may have populated it even though exists() was false earlier
+        // in an edge-case race; also guards future re-calls after a seed).
+        $holidays = $this->loadFromDb($year);
+
+        // Only cache non-empty results; leave empty uncached so a subsequent
+        // db:seed immediately takes effect without needing cache:clear.
+        if (! empty($holidays)) {
+            Cache::put($cacheKey, $holidays, now()->addDays(self::CACHE_TTL_DAYS));
+        }
+
+        return $holidays;
     }
 
     /**
@@ -83,6 +106,15 @@ class HolidayService
         return false;
     }
 
+    /**
+     * Drops the in-memory cache for the given year so the next call to
+     * getHolidays() will re-query DB (and attempt the API if DB is empty).
+     */
+    public function clearCache(int $year): void
+    {
+        Cache::forget("holidays:year:{$year}");
+    }
+
     // -------------------------------------------------------------------------
     // Internal helpers
     // -------------------------------------------------------------------------
@@ -92,7 +124,7 @@ class HolidayService
         return NationalHoliday::where('year', $year)
             ->orderBy('holiday_date')
             ->get()
-            ->map(fn ($row) => $this->toArray($row))
+            ->map(fn (NationalHoliday $row) => $this->toArray($row))
             ->all();
     }
 
@@ -183,7 +215,7 @@ class HolidayService
         return $clean;
     }
 
-    private function persistToDb(int $year, array $rows): void
+    private function persistToDb(array $rows): void
     {
         foreach ($rows as $row) {
             NationalHoliday::updateOrCreate(
