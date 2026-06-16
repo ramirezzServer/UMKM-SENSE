@@ -7,6 +7,8 @@ import * as salesApi from '@/features/sales/api';
 import { SALES_KEYS } from '@/features/sales/hooks';
 import * as predictionsApi from '@/features/predictions/api';
 import { PREDICTION_KEYS } from '@/features/predictions/hooks';
+import * as calendarApi from '@/features/calendar/api';
+import { CALENDAR_KEYS } from '@/features/calendar/hooks';
 
 /**
  * Prefetch data for a route on sidebar hover.
@@ -67,5 +69,16 @@ export function prefetchRoute(qc: QueryClient, path: string): void {
         staleTime: 30_000,
       });
       break;
+
+    case '/calendar': {
+      const d = new Date();
+      const currentMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      void qc.prefetchQuery({
+        queryKey: CALENDAR_KEYS.month(currentMonth),
+        queryFn: () => calendarApi.getCalendar(currentMonth),
+        staleTime: 60_000,
+      });
+      break;
+    }
   }
 }

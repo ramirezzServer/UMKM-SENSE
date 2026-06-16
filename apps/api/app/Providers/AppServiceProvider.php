@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Event;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Policies\EventPolicy;
 use App\Policies\ProductPolicy;
 use App\Policies\TransactionPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -18,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Gate::policy(Event::class, EventPolicy::class);
         Gate::policy(Product::class, ProductPolicy::class);
         Gate::policy(Transaction::class, TransactionPolicy::class);
         $this->configureRateLimiters();

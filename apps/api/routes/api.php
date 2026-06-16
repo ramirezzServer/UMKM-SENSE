@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PredictionController;
@@ -64,6 +66,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/conditions', [DashboardController::class, 'conditions']);
         Route::get('/tomorrow-prediction', [DashboardController::class, 'tomorrowPrediction']);
     });
+
+    // Calendar (combined events + holidays for a month)
+    Route::get('/calendar', [CalendarController::class, 'index']);
+
+    // User events (CRUD — no show endpoint needed, data comes via /calendar)
+    Route::apiResource('events', EventController::class)->except(['show']);
 
     // Prediction history (read-only, no throttle)
     Route::get('/predictions', [PredictionController::class, 'index']);
