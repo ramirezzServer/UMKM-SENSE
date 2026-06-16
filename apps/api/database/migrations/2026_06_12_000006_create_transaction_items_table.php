@@ -12,17 +12,18 @@ return new class extends Migration
             $table->id();
             $table->foreignId('transaction_id')
                 ->constrained()
-                ->onDelete('cascade')
-                ->index();
+                ->cascadeOnDelete();
             $table->foreignId('product_id')
                 ->constrained()
-                ->onDelete('restrict')
-                ->index();
-            $table->string('product_name', 100);   // snapshot nama saat transaksi
+                ->restrictOnDelete();
+            $table->string('product_name', 100);
             $table->unsignedInteger('qty');
             $table->decimal('unit_price', 12, 2);
             $table->decimal('subtotal', 14, 2);
             $table->timestamp('created_at')->useCurrent();
+
+            $table->index('transaction_id');
+            $table->index('product_id');
         });
     }
 

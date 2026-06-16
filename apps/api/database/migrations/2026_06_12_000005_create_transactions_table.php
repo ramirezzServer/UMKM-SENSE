@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade')->index();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('customer_name', 100)->nullable();
             $table->date('transaction_date');
             $table->string('payment_method', 20)->default('Cash');
