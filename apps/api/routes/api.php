@@ -65,7 +65,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/tomorrow-prediction', [DashboardController::class, 'tomorrowPrediction']);
     });
 
-    // Prediction — async, server-to-server with FastAPI microservice
+    // Prediction history (read-only, no throttle)
+    Route::get('/predictions', [PredictionController::class, 'index']);
+    Route::get('/predictions/{id}', [PredictionController::class, 'show']);
+
+    // Prediction — async write + status polling (throttled)
     Route::middleware('throttle:predictions')->group(function () {
         Route::post('/predictions', [PredictionController::class, 'store']);
         Route::get('/predictions/{id}/status', [PredictionController::class, 'status']);

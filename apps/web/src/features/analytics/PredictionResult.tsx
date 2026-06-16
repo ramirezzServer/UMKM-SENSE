@@ -684,10 +684,11 @@ const TABS: { id: TabId; label: string }[] = [
 
 interface Props {
   prediction: PredictionDetail;
-  onReset: () => void;
+  onReset?: () => void;
+  resetLabel?: string;
 }
 
-export default function PredictionResult({ prediction, onReset }: Props) {
+export default function PredictionResult({ prediction, onReset, resetLabel }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>('ringkasan');
 
   return (
@@ -708,13 +709,15 @@ export default function PredictionResult({ prediction, onReset }: Props) {
             {fmtDate(prediction.prediction_start)} — {fmtDate(prediction.prediction_end)}
           </p>
         </div>
-        <Button
-          variant="ghost"
-          onClick={onReset}
-          className="border border-gray-200 px-3 py-1.5 text-xs hover:bg-gray-50"
-        >
-          ← Analisis Baru
-        </Button>
+        {onReset && (
+          <Button
+            variant="ghost"
+            onClick={onReset}
+            className="border border-gray-200 px-3 py-1.5 text-xs hover:bg-gray-50"
+          >
+            {resetLabel ?? '← Analisis Baru'}
+          </Button>
+        )}
       </div>
 
       {/* Tab navigation */}

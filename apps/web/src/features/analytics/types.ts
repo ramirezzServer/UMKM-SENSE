@@ -31,6 +31,7 @@ export interface PredictionWarning {
 
 export interface PredictionDetail {
   product_id: number;
+  product_name?: string;
   prediction_start: string;
   prediction_end: string;
   forecast_method: string;

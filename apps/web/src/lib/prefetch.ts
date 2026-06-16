@@ -5,6 +5,8 @@ import * as productsApi from '@/features/products/api';
 import { PRODUCT_KEYS } from '@/features/products/hooks';
 import * as salesApi from '@/features/sales/api';
 import { SALES_KEYS } from '@/features/sales/hooks';
+import * as predictionsApi from '@/features/predictions/api';
+import { PREDICTION_KEYS } from '@/features/predictions/hooks';
 
 /**
  * Prefetch data for a route on sidebar hover.
@@ -55,6 +57,14 @@ export function prefetchRoute(qc: QueryClient, path: string): void {
         queryKey: SALES_KEYS.selectProducts,
         queryFn: salesApi.getSelectProducts,
         staleTime: 2 * 60 * 1000,
+      });
+      break;
+
+    case '/predictions':
+      void qc.prefetchQuery({
+        queryKey: PREDICTION_KEYS.list(1),
+        queryFn: () => predictionsApi.getPredictionHistory(1),
+        staleTime: 30_000,
       });
       break;
   }

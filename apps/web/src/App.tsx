@@ -20,6 +20,8 @@ const DashboardPage = lazy(() => import('@/routes/dashboard'));
 const ProductsPage = lazy(() => import('@/routes/products'));
 const SalesPage = lazy(() => import('@/routes/sales'));
 const AnalyticsPage = lazy(() => import('@/routes/analytics'));
+const PredictionsPage = lazy(() => import('@/routes/predictions'));
+const PredictionDetailPage = lazy(() => import('@/routes/prediction-detail'));
 
 // ─── Scroll restoration ───────────────────────────────────────────────────────
 
@@ -128,6 +130,22 @@ const router = createBrowserRouter([
                 element: (
                   <Suspense fallback={<PageFallback />}>
                     <AnalyticsPage />
+                  </Suspense>
+                ),
+              },
+              {
+                path: '/predictions',
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <PredictionsPage />
+                  </Suspense>
+                ),
+              },
+              {
+                path: '/predictions/:id',
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <PredictionDetailPage />
                   </Suspense>
                 ),
               },
