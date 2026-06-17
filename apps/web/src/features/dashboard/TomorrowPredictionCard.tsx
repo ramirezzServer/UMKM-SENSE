@@ -39,7 +39,7 @@ const PRIORITY_ICON_COLOR: Record<'high' | 'medium' | 'low', string> = {
 
 function Skeleton() {
   return (
-    <div className="animate-pulse rounded-card bg-white p-6 shadow-card">
+    <div className="animate-pulse rounded-card glass-card p-6 shadow-card">
       <div className="flex items-center justify-between">
         <div className="h-3.5 w-36 rounded-full bg-warm-200" />
         <div className="h-5 w-5 rounded bg-warm-200" />

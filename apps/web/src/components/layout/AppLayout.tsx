@@ -188,9 +188,9 @@ function OfflineBanner() {
       transition={{ duration: 0.2, ease: 'easeInOut' }}
       className="overflow-hidden"
     >
-      <div className="flex items-center gap-2 bg-amber-50 px-4 py-2.5 text-sm text-amber-800 border-b border-amber-100">
+      <div className="flex items-center gap-2 border-b border-primary-100 bg-primary-50 px-4 py-2.5 text-sm text-primary-800">
         <svg
-          className="h-4 w-4 flex-shrink-0 text-amber-500"
+          className="h-4 w-4 flex-shrink-0 text-primary-500"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -225,11 +225,11 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   return (
     <div className="flex h-full flex-col bg-white">
       {/* Logo */}
-      <div className="flex h-16 flex-shrink-0 items-center gap-2 border-b border-gray-100 px-6">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600">
+      <div className="flex h-16 flex-shrink-0 items-center gap-2.5 border-b border-warm-100 px-6">
+        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-accent-600 shadow-warm-sm">
           <span className="text-xs font-bold text-white">U</span>
         </div>
-        <span className="font-semibold text-gray-900">UMKM-Sense</span>
+        <span className="font-display font-semibold text-warm-900">UMKM-Sense</span>
       </div>
 
       {/* Navigation */}
@@ -244,10 +244,10 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                 className={({ isActive }) =>
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ' +
                   'transition-colors focus-visible:outline-none focus-visible:ring-2 ' +
-                  'focus-visible:ring-indigo-500 focus-visible:ring-inset ' +
+                  'focus-visible:ring-accent-500 focus-visible:ring-inset ' +
                   (isActive
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900')
+                    ? 'bg-accent-50 text-accent-700'
+                    : 'text-warm-600 hover:bg-warm-50 hover:text-warm-900')
                 }
               >
                 {item.icon}
@@ -259,15 +259,15 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
       </nav>
 
       {/* User + Logout */}
-      <div className="flex-shrink-0 border-t border-gray-100 px-3 py-4">
+      <div className="flex-shrink-0 border-t border-warm-100 px-3 py-4">
         {user && (
           <div className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-accent-100 text-sm font-semibold text-accent-700">
               {user.name.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-gray-900">{user.name}</p>
-              <p className="truncate text-xs text-gray-500">{user.email}</p>
+              <p className="truncate text-sm font-medium text-warm-900">{user.name}</p>
+              <p className="truncate text-xs text-warm-500">{user.email}</p>
             </div>
           </div>
         )}
@@ -275,7 +275,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           variant="ghost"
           onClick={handleLogout}
           loading={logoutMutation.isPending}
-          className="w-full justify-start gap-3 px-3 text-gray-600 hover:text-red-600"
+          className="w-full justify-start gap-3 px-3 text-warm-600 hover:text-danger-600"
         >
           <IconLogout />
           Keluar
@@ -293,13 +293,13 @@ export default function AppLayout() {
   const isOnline = useOnlineStatus();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      {/* ── Desktop sidebar (always visible) ── */}
-      <aside className="hidden w-64 flex-shrink-0 border-r border-gray-200 md:flex md:flex-col">
+    <div className="flex h-screen overflow-hidden bg-warm-50">
+      {/* Desktop sidebar */}
+      <aside className="hidden w-64 flex-shrink-0 border-r border-warm-200 md:flex md:flex-col">
         <SidebarContent />
       </aside>
 
-      {/* ── Mobile: overlay backdrop ── */}
+      {/* Mobile overlay backdrop */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -315,7 +315,7 @@ export default function AppLayout() {
         )}
       </AnimatePresence>
 
-      {/* ── Mobile: slide-in sidebar ── */}
+      {/* Mobile slide-in sidebar */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.aside
@@ -324,33 +324,33 @@ export default function AppLayout() {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed inset-y-0 left-0 z-40 w-64 border-r border-gray-200 md:hidden"
+            className="fixed inset-y-0 left-0 z-40 w-64 border-r border-warm-200 md:hidden"
           >
             <SidebarContent onNavClick={() => setSidebarOpen(false)} />
           </motion.aside>
         )}
       </AnimatePresence>
 
-      {/* ── Main area ── */}
+      {/* Main area */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Mobile top bar */}
-        <header className="flex h-14 flex-shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4 md:hidden">
+        <header className="flex h-14 flex-shrink-0 items-center gap-3 border-b border-warm-200 bg-white px-4 md:hidden">
           <button
             type="button"
             aria-label={sidebarOpen ? 'Tutup navigasi' : 'Buka navigasi'}
-            aria-expanded={sidebarOpen ? 'true' : 'false'}
+            aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen((v) => !v)}
-            className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="rounded-lg p-1.5 text-warm-600 hover:bg-warm-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
           >
             {sidebarOpen ? <IconX /> : <IconMenu />}
           </button>
-          <span className="font-semibold text-gray-900">UMKM-Sense</span>
+          <span className="font-display font-semibold text-warm-900">UMKM-Sense</span>
         </header>
 
-        {/* Offline banner — slides in/out, no layout shift */}
+        {/* Offline banner */}
         <AnimatePresence>{!isOnline && <OfflineBanner key="offline-banner" />}</AnimatePresence>
 
-        {/* Page content with transition */}
+        {/* Page content */}
         <AnimatePresence mode="wait" initial={false}>
           <motion.main
             key={location.key}

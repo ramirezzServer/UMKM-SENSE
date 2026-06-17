@@ -70,7 +70,7 @@ export default function SalesTrendChart({ days = 7 }: { days?: number }) {
   const allZero = data?.every((d) => d.total === 0);
 
   return (
-    <div className="rounded-card bg-white p-6 shadow-card">
+    <div className="rounded-card glass-card p-6 shadow-card">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="font-display text-base font-bold text-warm-900">Tren Penjualan</h2>
         <span className="text-xs font-medium text-warm-400">7 hari terakhir</span>

@@ -110,7 +110,7 @@ function StatCard({ label, value, format, comparison, icon, accent }: StatCardPr
 
   return (
     <motion.div
-      className="group relative overflow-hidden rounded-card bg-white p-6 shadow-card transition-shadow duration-200 hover:shadow-card-hover"
+      className="group relative overflow-hidden rounded-card glass-card p-6 shadow-card transition-shadow duration-200 hover:shadow-card-hover"
       initial="rest"
       whileHover="hover"
     >
@@ -143,7 +143,7 @@ function SummarySkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="animate-pulse rounded-card bg-white p-6 shadow-card">
+        <div key={i} className="animate-pulse rounded-card glass-card p-6 shadow-card">
           <div className="flex items-start justify-between">
             <div className="h-3 w-28 rounded-full bg-warm-200" />
             <div className="h-9 w-9 rounded-xl bg-warm-200" />

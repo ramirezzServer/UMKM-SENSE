@@ -12,25 +12,21 @@
 /* ─── CSS custom properties ────────────────────────────────────────────────── */
 @layer base {
   :root {
-    /* Semantic surface tokens */
-    --surface-app:     #F7F7F4;
-    --surface-card:    #FFFFFF;
-    --surface-raised:  #FDFDFB;
+    --surface-app:    #F7F7F4;
+    --surface-card:   #FFFFFF;
+    --surface-raised: #FDFDFB;
 
-    /* Semantic text tokens */
-    --text-primary:    #1C1917;
-    --text-secondary:  #57534E;
-    --text-tertiary:   #A8A29E;
-    --text-inverse:    #FFFFFF;
+    --text-primary:   #1C1917;
+    --text-secondary: #57534E;
+    --text-tertiary:  #A8A29E;
+    --text-inverse:   #FFFFFF;
 
-    /* Border tokens */
-    --border-default:  #E7E5E4;
-    --border-strong:   #D6D3D1;
+    --border-default: #E7E5E4;
+    --border-strong:  #D6D3D1;
 
-    /* Radius tokens (mirror Tailwind config) */
-    --radius-card:     1rem;
-    --radius-panel:    1.25rem;
-    --radius-pill:     9999px;
+    --radius-card:  1rem;
+    --radius-panel: 1.25rem;
+    --radius-pill:  9999px;
   }
 
   body {
@@ -49,5 +45,133 @@
   h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-weight: 600;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   AMBIENT BACKGROUND — Dashboard "Pasar Modern" atmosphere
+   All animations are GPU-only (transform) for zero layout thrash.
+   Orbs are absolutely positioned inside a clipped container.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Keyframes — only transform + opacity, hardware-composited */
+@keyframes orb-drift-1 {
+  0%,  100% { transform: translate(0px,   0px)   scale(1);    }
+  25%        { transform: translate(28px,  -22px) scale(1.05); }
+  55%        { transform: translate(-12px,  16px) scale(0.97); }
+  80%        { transform: translate(18px,   8px)  scale(1.02); }
+}
+
+@keyframes orb-drift-2 {
+  0%,  100% { transform: translate(0px,   0px)   scale(1);    }
+  30%        { transform: translate(-26px,  22px) scale(1.04); }
+  60%        { transform: translate(16px,  -14px) scale(0.98); }
+  85%        { transform: translate(-8px,   24px) scale(1.03); }
+}
+
+@keyframes orb-drift-3 {
+  0%,  100% { transform: translate(0px,   0px)   scale(1);    }
+  40%        { transform: translate(22px,  -16px) scale(1.06); }
+  70%        { transform: translate(-16px,  10px) scale(0.96); }
+}
+
+/* Orb base */
+.ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Amber glow — top-left corner */
+.ambient-orb-1 {
+  width: 640px;
+  height: 460px;
+  top: -140px;
+  left: -200px;
+  background: radial-gradient(ellipse at center, rgb(245 158 11 / 0.18) 0%, transparent 70%);
+  filter: blur(50px);
+  animation: orb-drift-1 32s ease-in-out infinite;
+}
+
+/* Teal glow — top-right corner */
+.ambient-orb-2 {
+  width: 520px;
+  height: 520px;
+  top: -90px;
+  right: -160px;
+  background: radial-gradient(ellipse at center, rgb(20 184 166 / 0.15) 0%, transparent 70%);
+  filter: blur(55px);
+  animation: orb-drift-2 41s ease-in-out infinite;
+}
+
+/* Indigo glow — mid-page, subtle */
+.ambient-orb-3 {
+  width: 500px;
+  height: 420px;
+  top: 240px;
+  left: 20%;
+  background: radial-gradient(ellipse at center, rgb(99 102 241 / 0.09) 0%, transparent 68%);
+  filter: blur(65px);
+  animation: orb-drift-3 50s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GLASS CARD — semi-transparent card surface with optional backdrop blur
+   Usage: replace bg-white with glass-card in dashboard card components.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.glass-card {
+  /* Mobile-first: no blur (performance), just slight transparency */
+  background-color: rgb(255 255 255 / 0.92);
+  border: 1px solid rgb(255 255 255 / 0.65);
+}
+
+@media (min-width: 768px) {
+  .glass-card {
+    background-color: rgb(255 255 255 / 0.84);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GRADIENT TEXT — warm amber→teal heading accent
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.text-gradient-warm {
+  background: linear-gradient(128deg, #d97706 0%, #0d9488 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY — prefers-reduced-motion: stop all ambient animation
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-orb {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MOBILE PERFORMANCE — reduce orb weight on small screens
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  .ambient-orb {
+    opacity: 0.55;
+    filter: blur(30px);
+    animation: none;
+    will-change: auto;
+  }
+
+  .glass-card {
+    /* No backdrop-filter on mobile (already handled above, but explicit) */
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }

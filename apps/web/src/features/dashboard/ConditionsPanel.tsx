@@ -227,7 +227,7 @@ function NoWeatherState() {
 
 function ConditionsSkeleton() {
   return (
-    <div className="animate-pulse space-y-6 rounded-card bg-white p-6 shadow-card">
+    <div className="animate-pulse space-y-6 rounded-card glass-card p-6 shadow-card">
       <div>
         <div className="h-4 w-32 rounded-full bg-warm-200" />
         <div className="mt-3 flex items-center gap-3 rounded-xl border border-warm-100 bg-warm-50 p-3">
@@ -322,7 +322,7 @@ export default function ConditionsPanel() {
   const condStyle = cuaca ? CONDITION_STYLE[cuaca.condition] : null;
 
   return (
-    <div className="space-y-5 rounded-card bg-white p-6 shadow-card">
+    <div className="space-y-5 rounded-card glass-card p-6 shadow-card">
       {/* ── Cuaca ── */}
       <div>
         <h2 className="font-display text-sm font-bold text-warm-900">Kondisi Hari Ini</h2>

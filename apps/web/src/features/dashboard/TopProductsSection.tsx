@@ -37,7 +37,7 @@ const SKELETON_BAR = ['w-full', 'w-4/5', 'w-3/5', 'w-2/5', 'w-1/3'];
 
 function TopProductsSkeleton() {
   return (
-    <div className="animate-pulse rounded-card bg-white p-6 shadow-card">
+    <div className="animate-pulse rounded-card glass-card p-6 shadow-card">
       <div className="mb-4 h-5 w-40 rounded-full bg-warm-200" />
       <div className="space-y-4">
         {[0, 1, 2, 3, 4].map((i) => (
@@ -99,7 +99,7 @@ export default function TopProductsSection({
   const maxRevenue = data?.length ? Math.max(...data.map((p) => p.total_revenue)) : 1;
 
   return (
-    <div className="rounded-card bg-white p-6 shadow-card">
+    <div className="rounded-card glass-card p-6 shadow-card">
       <div className="mb-5 flex items-center gap-2">
         <Medal className="h-4 w-4 text-primary-500" />
         <h2 className="font-display text-base font-bold text-warm-900">Produk Terlaris</h2>
