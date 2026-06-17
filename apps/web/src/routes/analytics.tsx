@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCreatePrediction, usePredictionStatus } from '@/features/analytics/hooks';
 import PredictionForm from '@/features/analytics/PredictionForm';
@@ -81,12 +82,22 @@ function FailedState({ error, onRetry }: { error: string | null; onRetry: () => 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AnalyticsPage() {
-  const [phase, setPhase] = useState<Phase>({ kind: 'idle' });
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Derive initial phase from URL so navigation doesn't reset the state
+  const [phase, setPhase] = useState<Phase>(() => {
+    const raw = searchParams.get('prediction');
+    if (raw) {
+      const id = parseInt(raw, 10);
+      if (!isNaN(id) && id > 0) return { kind: 'polling', predictionId: id };
+    }
+    return { kind: 'idle' };
+  });
 
   const createMutation = useCreatePrediction();
 
   const pollingId = phase.kind === 'polling' ? phase.predictionId : null;
-  const { data: statusData } = usePredictionStatus(pollingId);
+  const { data: statusData, isError: statusIsError } = usePredictionStatus(pollingId);
 
   // Transition from polling → done / failed when status updates
   useEffect(() => {
@@ -98,6 +109,13 @@ export default function AnalyticsPage() {
     }
   }, [statusData, phase.kind]);
 
+  // Invalid / 404 prediction ID → clear URL param and fall back to form
+  useEffect(() => {
+    if (phase.kind !== 'polling' || !statusIsError) return;
+    setSearchParams({}, { replace: true });
+    setPhase({ kind: 'idle' });
+  }, [statusIsError, phase.kind, setSearchParams]);
+
   const handleSubmit = async (values: PredictionFormValues) => {
     try {
       const res = await createMutation.mutateAsync({
@@ -105,6 +123,7 @@ export default function AnalyticsPage() {
         prediction_start: values.prediction_start,
         prediction_end: values.prediction_end,
       });
+      setSearchParams({ prediction: String(res.prediction_id) }, { replace: true });
       setPhase({ kind: 'polling', predictionId: res.prediction_id });
     } catch {
       setPhase({ kind: 'failed', error: null });
@@ -113,6 +132,7 @@ export default function AnalyticsPage() {
 
   const handleReset = () => {
     createMutation.reset();
+    setSearchParams({}, { replace: true });
     setPhase({ kind: 'idle' });
   };
 
