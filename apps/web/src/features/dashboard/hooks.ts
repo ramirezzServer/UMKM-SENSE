@@ -41,6 +41,7 @@ export function useConditions() {
     queryKey: DASHBOARD_KEYS.conditions,
     queryFn: dashboardApi.getConditions,
     staleTime: TEN_MINUTES,
+    retry: false,
   });
 }
 
@@ -49,5 +50,6 @@ export function useTomorrowPrediction() {
     queryKey: DASHBOARD_KEYS.tomorrowPrediction,
     queryFn: dashboardApi.getTomorrowPrediction,
     staleTime: TEN_MINUTES,
+    retry: false,
   });
 }

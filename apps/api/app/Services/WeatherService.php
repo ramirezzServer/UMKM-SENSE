@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\District;
 use App\Models\WeatherData;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -35,8 +34,8 @@ class WeatherService
 
     /**
      * Get weather for a specific district and date.
-     * Returns from cache if available; otherwise fetches from API and persists.
-     * Falls back to latest DB record on API failure.
+     * Reads from cache first, then DB. Never calls the external API — that is
+     * the responsibility of syncDistrict() (weather:sync command / scheduler).
      */
     public function getWeather(string $district, string $date): ?array
     {
@@ -46,35 +45,27 @@ class WeatherService
             return Cache::get($cacheKey);
         }
 
-        $coords = $this->resolveCoordinates($district);
+        $row = WeatherData::where('district', $district)
+            ->where('date', $date)
+            ->first();
 
-        if ($coords === null) {
+        if (! $row) {
             return $this->fallbackFromDb($district);
         }
 
-        $fetched = $this->fetchDailyForecast($district, $coords['lat'], $coords['lng'], 1, $date);
+        $data = $this->toArray($row);
+        Cache::put($cacheKey, $data, now()->addHours(self::CACHE_TTL_HOURS));
 
-        if ($fetched === null) {
-            return $this->fallbackFromDb($district);
-        }
-
-        Cache::put($cacheKey, $fetched, now()->addHours(self::CACHE_TTL_HOURS));
-
-        return $fetched;
+        return $data;
     }
 
     /**
      * Get multi-day forecast for a district.
-     * Each day fetched from cache or API; missing days fall back to DB.
+     * Reads from cache first, then DB for the requested date range.
+     * Never calls the external API on the request path.
      */
     public function getForecast(string $district, int $days = 7): array
     {
-        $coords = $this->resolveCoordinates($district);
-
-        if ($coords === null) {
-            return [];
-        }
-
         $today = Carbon::today()->format('Y-m-d');
         $cacheKey = "weather:{$district}:{$today}:forecast:{$days}";
 
@@ -82,7 +73,17 @@ class WeatherService
             return Cache::get($cacheKey);
         }
 
-        $rows = $this->fetchMultiDay($district, $coords['lat'], $coords['lng'], $days);
+        $dates = collect(range(0, $days - 1))
+            ->map(fn ($i) => Carbon::today()->addDays($i)->format('Y-m-d'))
+            ->all();
+
+        $rows = WeatherData::where('district', $district)
+            ->whereIn('date', $dates)
+            ->orderBy('date')
+            ->get()
+            ->map(fn ($row) => $this->toArray($row))
+            ->values()
+            ->all();
 
         if (! empty($rows)) {
             Cache::put($cacheKey, $rows, now()->addHours(self::CACHE_TTL_HOURS));
@@ -107,17 +108,6 @@ class WeatherService
     // -------------------------------------------------------------------------
     // Internal helpers
     // -------------------------------------------------------------------------
-
-    private function resolveCoordinates(string $district): ?array
-    {
-        $row = District::where('name', $district)->first(['latitude', 'longitude']);
-
-        if (! $row) {
-            return null;
-        }
-
-        return ['lat' => (float) $row->latitude, 'lng' => (float) $row->longitude];
-    }
 
     /**
      * Fetch multiple forecast days, persist each to DB, return array of weather arrays.
@@ -192,22 +182,6 @@ class WeatherService
 
             return [];
         }
-    }
-
-    /**
-     * Fetch and persist a single day. Returns the weather array or null on failure.
-     */
-    private function fetchDailyForecast(string $district, float $lat, float $lng, int $days, string $targetDate): ?array
-    {
-        $rows = $this->fetchMultiDay($district, $lat, $lng, $days);
-
-        foreach ($rows as $row) {
-            if ($row['date'] === $targetDate) {
-                return $row;
-            }
-        }
-
-        return null;
     }
 
     private function fallbackFromDb(string $district): ?array
