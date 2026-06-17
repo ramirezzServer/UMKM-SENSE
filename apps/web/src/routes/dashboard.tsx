@@ -35,18 +35,15 @@ export default function DashboardPage() {
   const { data: user } = useAuth();
 
   return (
-    // Outer wrapper: relative + isolate creates a stacking context.
-    // The ambient layer sits at -z-10 inside, clipped by overflow-hidden.
     <div className="relative isolate min-h-full">
       {/* ── Ambient background layer ────────────────────────────────────────── */}
-      {/* aria-hidden so screen readers skip decorative blobs */}
+      {/* Static multi-gradient fills the container; drift blobs animate on top */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+        className="pointer-events-none absolute inset-0 -z-10 dashboard-ambient"
       >
-        <div className="ambient-orb ambient-orb-1" />
-        <div className="ambient-orb ambient-orb-2" />
-        <div className="ambient-orb ambient-orb-3" />
+        <div className="ambient-drift-1" />
+        <div className="ambient-drift-2" />
       </div>
 
       {/* ── Page content ────────────────────────────────────────────────────── */}
