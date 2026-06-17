@@ -10,34 +10,21 @@ import TrendChartSkeleton from '@/features/dashboard/TrendChartSkeleton';
 // Chart is code-split — heavy Recharts bundle loads separately
 const SalesTrendChart = lazy(() => import('@/features/dashboard/SalesTrendChart'));
 
-// ─── Animated section wrapper ─────────────────────────────────────────────────
+// ─── Stagger variants ─────────────────────────────────────────────────────────
+
+const pageVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+};
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 18 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.35, delay: i * 0.08, ease: [0.25, 0.46, 0.45, 0.94] },
-  }),
+  show: { opacity: 1, y: 0, transition: { duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] } },
 };
 
-function Section({
-  children,
-  order,
-  className = '',
-}: {
-  children: React.ReactNode;
-  order: number;
-  className?: string;
-}) {
+function Section({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <motion.div
-      custom={order}
-      variants={sectionVariants}
-      initial="hidden"
-      animate="show"
-      className={className}
-    >
+    <motion.div variants={sectionVariants} className={className}>
       {children}
     </motion.div>
   );
@@ -49,43 +36,41 @@ export default function DashboardPage() {
   const { data: user } = useAuth();
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Halo, {user?.name ?? '—'}!</h1>
-        <p className="mt-1 text-sm text-gray-500">
+    <motion.div className="space-y-6" variants={pageVariants} initial="hidden" animate="show">
+      {/* ── Header ── */}
+      <Section>
+        <h1 className="font-display text-2xl font-bold text-warm-900">
+          Halo, {user?.name ?? '—'}!
+        </h1>
+        <p className="mt-1 text-sm text-warm-500">
           {user?.business?.name ? `${user.business.name} · ` : ''}
           Ringkasan penjualan hari ini
         </p>
-      </div>
+      </Section>
 
-      {/* Stat cards */}
-      <Section order={0}>
+      {/* ── Stat cards ── */}
+      <Section>
         <SummarySection />
       </Section>
 
-      {/* Chart (2/3) + right column (1/3): conditions + tomorrow prediction */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Section order={1} className="lg:col-span-2">
+      {/* ── Chart (2/3) + right column (1/3) ── */}
+      <Section className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
           <Suspense fallback={<TrendChartSkeleton />}>
             <SalesTrendChart days={7} />
           </Suspense>
-        </Section>
+        </div>
 
         <div className="flex flex-col gap-6">
-          <Section order={2}>
-            <ConditionsPanel />
-          </Section>
-          <Section order={3}>
-            <TomorrowPredictionCard />
-          </Section>
+          <ConditionsPanel />
+          <TomorrowPredictionCard />
         </div>
-      </div>
+      </Section>
 
-      {/* Top products */}
-      <Section order={4}>
+      {/* ── Top products ── */}
+      <Section>
         <TopProductsSection days={7} limit={5} />
       </Section>
-    </div>
+    </motion.div>
   );
 }
