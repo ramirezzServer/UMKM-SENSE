@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\District;
 use App\Services\WeatherService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class WeatherSyncCommand extends Command
@@ -58,6 +59,7 @@ class WeatherSyncCommand extends Command
         }
 
         $this->info("Weather sync complete. Synced: {$synced}, skipped: {$skipped}.");
+        Log::info('weather:sync complete', ['synced' => $synced, 'skipped' => $skipped]);
 
         return self::SUCCESS;
     }

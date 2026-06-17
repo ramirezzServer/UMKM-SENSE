@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\NationalHoliday;
 use App\Services\HolidayService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class HolidaysSyncCommand extends Command
 {
@@ -47,9 +48,11 @@ class HolidaysSyncCommand extends Command
 
         if ($dbCount > 0) {
             $this->info("  ✓ {$year}: {$dbCount} holiday(s) available in DB.");
+            Log::info('holidays:sync complete', ['year' => $year, 'count' => $dbCount]);
         } else {
             $this->warn("  ✗ {$year}: API unavailable and DB is empty.");
             $this->line('    Run: php artisan db:seed --class=NationalHolidaySeeder');
+            Log::warning('holidays:sync: no data for year', ['year' => $year]);
         }
 
         if ($fromApi && count($results) === $dbCount) {
