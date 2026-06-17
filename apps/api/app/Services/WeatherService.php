@@ -46,7 +46,7 @@ class WeatherService
         }
 
         $row = WeatherData::where('district', $district)
-            ->where('date', $date)
+            ->whereDate('date', $date)
             ->first();
 
         if (! $row) {

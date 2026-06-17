@@ -64,26 +64,31 @@ class WeatherTest extends TestCase
         $today = now()->format('Y-m-d');
         $this->makeDistrict();
 
-        // Sequence: only ONE real response — second API call gets 500 (proves cache was used)
+        // syncDistrict is the only code path that calls the external API; it also primes the
+        // per-day cache entries used by getWeather(). One API call expected here.
         Http::fake([
-            'api.open-meteo.com/*' => Http::sequence()
-                ->push($this->openMeteoPayload(), 200)
-                ->whenEmpty(Http::response(null, 500)),
+            'api.open-meteo.com/*' => Http::response($this->openMeteoPayload(), 200),
         ]);
 
         $service = app(WeatherService::class);
+        $service->syncDistrict('Coblong', -6.8942, 107.6108);
+        Http::assertSentCount(1);
+
+        // Replace the fake with a 500 — any further API call would surface as an error,
+        // proving that both getWeather() calls are served entirely from cache.
+        Http::fake(['api.open-meteo.com/*' => Http::response(null, 500)]);
 
         $first = $service->getWeather('Coblong', $today);
         $second = $service->getWeather('Coblong', $today);
 
-        Http::assertSentCount(1);
+        Http::assertNothingSent();
         $this->assertNotNull($first);
         $this->assertEquals('rainy', $first['condition']);
         $this->assertEquals($first, $second);
     }
 
     // -------------------------------------------------------------------------
-    // DB persistence: data is written on first API fetch
+    // DB persistence: syncDistrict writes rows to weather_data
     // -------------------------------------------------------------------------
 
     public function test_api_response_is_persisted_to_weather_data_table(): void
@@ -95,9 +100,9 @@ class WeatherTest extends TestCase
             'api.open-meteo.com/*' => Http::response($this->openMeteoPayload(), 200),
         ]);
 
-        app(WeatherService::class)->getWeather('Coblong', $today);
+        // getWeather() is now cache/DB-read-only; syncDistrict() is the writer.
+        app(WeatherService::class)->syncDistrict('Coblong', -6.8942, 107.6108);
 
-        // Use whereDate to avoid SQLite date+time representation issues
         $this->assertTrue(
             WeatherData::where('district', 'Coblong')
                 ->whereDate('date', $today)
@@ -211,7 +216,6 @@ class WeatherTest extends TestCase
 
     public function test_weather_today_returns_weather_for_user_district(): void
     {
-        $today = now()->format('Y-m-d');
         $this->makeDistrict();
 
         $user = User::factory()->create();
@@ -220,6 +224,10 @@ class WeatherTest extends TestCase
         Http::fake([
             'api.open-meteo.com/*' => Http::response($this->openMeteoPayload(), 200),
         ]);
+
+        // Populate DB and prime cache via syncDistrict; the endpoint calls getWeather()
+        // which reads from cache/DB only — it will not make any API call itself.
+        app(WeatherService::class)->syncDistrict('Coblong', -6.8942, 107.6108);
 
         $this->actingAs($user)
             ->getJson('/api/weather/today')
