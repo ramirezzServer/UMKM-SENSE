@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { MotionConfig } from 'framer-motion';
 import queryClient from '@/lib/queryClient';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -23,6 +24,7 @@ const AnalyticsPage = lazy(() => import('@/routes/analytics'));
 const PredictionsPage = lazy(() => import('@/routes/predictions'));
 const PredictionDetailPage = lazy(() => import('@/routes/prediction-detail'));
 const CalendarPage = lazy(() => import('@/routes/calendar'));
+const StyleguidePage = lazy(() => import('@/routes/dev/styleguide'));
 
 // ─── Scroll restoration ───────────────────────────────────────────────────────
 
@@ -59,6 +61,15 @@ const router = createBrowserRouter([
   {
     element: <RootWrapper />,
     children: [
+      // Dev-only style guide — public, no auth required
+      {
+        path: '/dev/styleguide',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <StyleguidePage />
+          </Suspense>
+        ),
+      },
       // Guest-only routes (authenticated users → /dashboard)
       {
         element: <GuestRoute />,
@@ -173,7 +184,9 @@ export default function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <MotionConfig reducedMotion="user">
+          <RouterProvider router={router} />
+        </MotionConfig>
       </QueryClientProvider>
     </ErrorBoundary>
   );

@@ -1,3 +1,53 @@
+/* ─── Font imports ─────────────────────────────────────────────────────────── */
+@import '@fontsource/plus-jakarta-sans/400.css';
+@import '@fontsource/plus-jakarta-sans/500.css';
+@import '@fontsource/plus-jakarta-sans/600.css';
+@import '@fontsource/plus-jakarta-sans/700.css';
+
+/* ─── Tailwind directives ──────────────────────────────────────────────────── */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ─── CSS custom properties ────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* Semantic surface tokens */
+    --surface-app:     #F7F7F4;
+    --surface-card:    #FFFFFF;
+    --surface-raised:  #FDFDFB;
+
+    /* Semantic text tokens */
+    --text-primary:    #1C1917;
+    --text-secondary:  #57534E;
+    --text-tertiary:   #A8A29E;
+    --text-inverse:    #FFFFFF;
+
+    /* Border tokens */
+    --border-default:  #E7E5E4;
+    --border-strong:   #D6D3D1;
+
+    /* Radius tokens (mirror Tailwind config) */
+    --radius-card:     1rem;
+    --radius-panel:    1.25rem;
+    --radius-pill:     9999px;
+  }
+
+  body {
+    background-color: var(--surface-app);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 700;
+  }
+
+  h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 600;
+  }
+}
