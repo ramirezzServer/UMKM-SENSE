@@ -36,12 +36,8 @@ export default function DashboardPage() {
 
   return (
     <div className="relative isolate min-h-full">
-      {/* ── Ambient background layer ────────────────────────────────────────── */}
-      {/* Static multi-gradient fills the container; drift blobs animate on top */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 dashboard-ambient"
-      >
+      {/* ── Animated drift blobs (float over the layout-level gradient) ──────── */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
         <div className="ambient-drift-1" />
         <div className="ambient-drift-2" />
       </div>

@@ -111,7 +111,7 @@ function HeroSection() {
   const show3D = webglAvailable.current && !prefersReduced;
 
   return (
-    <section className="relative min-h-screen overflow-hidden pt-16">
+    <section className="relative isolate min-h-screen overflow-hidden pt-16">
       {/* Warm ambient background */}
       <div className="absolute inset-0 -z-10 landing-hero-bg" aria-hidden="true" />
 
@@ -556,7 +556,7 @@ function WhySection() {
 
 function CtaSection() {
   return (
-    <section className="relative overflow-hidden py-28">
+    <section className="relative isolate overflow-hidden py-28">
       {/* Dark warm gradient bg */}
       <div className="absolute inset-0 -z-10 landing-cta-bg" aria-hidden="true" />
 
