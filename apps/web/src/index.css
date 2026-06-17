@@ -134,6 +134,25 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   LANDING PAGE — ambient backgrounds (complex multi-gradient, not Tailwind-able)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.landing-hero-bg {
+  background:
+    radial-gradient(ellipse 70% 60% at 10% 15%, rgb(245 158 11 / 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 65% 70% at 90% 85%, rgb(20 184 166 / 0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 55% 5%,  rgb(99 102 241 / 0.08) 0%, transparent 55%),
+    #FAFAF9;
+}
+
+.landing-cta-bg {
+  background:
+    radial-gradient(ellipse 70% 80% at 20% 50%, rgb(120 53 15 / 0.9) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 80% 30%, rgb(67 56 202 / 0.4) 0%, transparent 60%),
+    #1C1917;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    GRADIENT TEXT — warm amber→teal heading accent
    ═══════════════════════════════════════════════════════════════════════════════ */
 

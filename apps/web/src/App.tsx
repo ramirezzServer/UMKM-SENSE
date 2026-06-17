@@ -14,6 +14,7 @@ import AuthLayout from '@/components/layout/AuthLayout';
 import AppLayout from '@/components/layout/AppLayout';
 
 // Lazy page bundles — each route chunk loaded on first navigation
+const LandingPage = lazy(() => import('@/routes/landing'));
 const LoginPage = lazy(() => import('@/routes/login'));
 const RegisterPage = lazy(() => import('@/routes/register'));
 const ResetPasswordPage = lazy(() => import('@/routes/reset-password'));
@@ -50,7 +51,7 @@ function RootWrapper() {
 function PageFallback() {
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-200 border-t-primary-600" />
     </div>
   );
 }
@@ -61,6 +62,16 @@ const router = createBrowserRouter([
   {
     element: <RootWrapper />,
     children: [
+      // Public landing page — accessible to everyone (logged-in or not)
+      {
+        path: '/',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <LandingPage />
+          </Suspense>
+        ),
+      },
+
       // Dev-only style guide — public, no auth required
       {
         path: '/dev/styleguide',
@@ -70,6 +81,7 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
+
       // Guest-only routes (authenticated users → /dashboard)
       {
         element: <GuestRoute />,
@@ -105,6 +117,7 @@ const router = createBrowserRouter([
           },
         ],
       },
+
       // Protected routes (unauthenticated users → /login)
       {
         element: <ProtectedRoute />,
@@ -112,7 +125,6 @@ const router = createBrowserRouter([
           {
             element: <AppLayout />,
             children: [
-              { path: '/', element: <Navigate to="/dashboard" replace /> },
               {
                 path: '/dashboard',
                 element: (
@@ -169,6 +181,7 @@ const router = createBrowserRouter([
                   </Suspense>
                 ),
               },
+              // Unknown protected paths → dashboard
               { path: '*', element: <Navigate to="/dashboard" replace /> },
             ],
           },

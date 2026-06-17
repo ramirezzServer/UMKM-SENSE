@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useTomorrowPrediction } from './hooks';
+import type { TomorrowPrediction } from './types';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
@@ -87,13 +88,9 @@ function EmptyState({ onNavigate }: { onNavigate: () => void }) {
 // This is the "signature" element: a gradient amber→indigo card with subtle
 // mouse-tracked tilt + layered depth. Restraint: only this one card gets the 3D.
 
-function PredictionCard({
-  data,
-  onNavigate,
-}: {
-  data: NonNullable<ReturnType<typeof useTomorrowPrediction>['data']>;
-  onNavigate: () => void;
-}) {
+type ActivePrediction = Extract<TomorrowPrediction, { has_prediction: true }>;
+
+function PredictionCard({ data, onNavigate }: { data: ActivePrediction; onNavigate: () => void }) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const mouseX = useMotionValue(0);
