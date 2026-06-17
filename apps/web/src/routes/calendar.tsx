@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import type { DialogMode } from '@/features/calendar/EventDialog';
 import EventDialog from '@/features/calendar/EventDialog';
 import type { CalendarEvent } from '@/features/calendar/types';
@@ -8,8 +9,9 @@ import {
   useDeleteEvent,
   useUpdateEvent,
 } from '@/features/calendar/hooks';
+import { stagger, staggerItem } from '@/lib/motion';
 
-// ─── Date helpers (no external date library) ──────────────────────────────────
+// ─── Date helpers ─────────────────────────────────────────────────────────────
 
 function toYYYYMM(year: number, month: number): string {
   return `${year}-${String(month).padStart(2, '0')}`;
@@ -26,14 +28,12 @@ function todayStr(): string {
   return toYYYYMMDD(new Date());
 }
 
-/** Days in a given month (1-indexed month). */
 function daysInMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();
 }
 
-/** Day-of-week index, Mon=0 … Sun=6 */
 function dayOfWeekMon0(year: number, month: number, day: number): number {
-  const dow = new Date(year, month - 1, day).getDay(); // 0=Sun
+  const dow = new Date(year, month - 1, day).getDay();
   return dow === 0 ? 6 : dow - 1;
 }
 
@@ -81,9 +81,9 @@ function eventSpansDay(ev: CalendarEvent, dayStr: string): boolean {
 const DAY_LABELS = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
 const TYPE_COLORS: Record<string, string> = {
-  promo: 'bg-amber-100 text-amber-800',
-  libur: 'bg-red-100 text-red-700',
-  lainnya: 'bg-indigo-100 text-indigo-800',
+  promo: 'bg-primary-100 text-primary-800',
+  libur: 'bg-danger-100 text-danger-700',
+  lainnya: 'bg-accent-100 text-accent-800',
 };
 
 function typeLabel(type: string): string {
@@ -93,9 +93,9 @@ function typeLabel(type: string): string {
 }
 
 function typeDot(type: string): string {
-  if (type === 'promo') return 'bg-amber-400';
-  if (type === 'libur') return 'bg-red-400';
-  return 'bg-indigo-400';
+  if (type === 'promo') return 'bg-primary-400';
+  if (type === 'libur') return 'bg-danger-400';
+  return 'bg-accent-400';
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -105,7 +105,7 @@ function CalendarSkeleton() {
     <div className="animate-pulse space-y-1" aria-hidden="true">
       <div className="grid grid-cols-7 gap-1">
         {Array.from({ length: 35 }).map((_, i) => (
-          <div key={i} className="h-20 rounded-lg bg-gray-100" />
+          <div key={i} className="h-20 rounded-lg bg-warm-100" />
         ))}
       </div>
     </div>
@@ -117,7 +117,7 @@ function CalendarSkeleton() {
 export default function CalendarPage() {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1); // 1-indexed
+  const [month, setMonth] = useState(now.getMonth() + 1);
   const monthKey = toYYYYMM(year, month);
 
   const { data, isLoading, isError } = useCalendar(monthKey);
@@ -170,19 +170,27 @@ export default function CalendarPage() {
   const monthLabel = formatMonthLabel(year, month);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+    <motion.div
+      variants={stagger}
+      initial="hidden"
+      animate="visible"
+      className="mx-auto max-w-5xl space-y-5"
+    >
       {/* Page header */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <motion.div
+        variants={staggerItem}
+        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      >
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Kalender Event</h1>
-          <p className="mt-0.5 text-sm text-gray-500">
+          <h1 className="font-display text-2xl font-bold text-warm-900">Kalender Event</h1>
+          <p className="mt-0.5 text-sm text-warm-500">
             Catat promo, hari tutup, dan acara penting bisnis Anda.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setDialog({ kind: 'create' })}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 self-start rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-warm-sm transition-colors hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 sm:self-auto"
         >
           <svg
             className="h-4 w-4"
@@ -196,15 +204,15 @@ export default function CalendarPage() {
           </svg>
           Tambah Event
         </button>
-      </div>
+      </motion.div>
 
       {/* Month navigator */}
-      <div className="mb-4 flex items-center justify-between">
+      <motion.div variants={staggerItem} className="flex items-center justify-between">
         <button
           type="button"
           onClick={prevMonth}
           aria-label="Bulan sebelumnya"
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="rounded-lg p-2 text-warm-500 transition-colors hover:bg-warm-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
         >
           <svg
             className="h-5 w-5"
@@ -217,12 +225,14 @@ export default function CalendarPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </button>
-        <h2 className="text-base font-semibold capitalize text-gray-900">{monthLabel}</h2>
+        <h2 className="font-display text-base font-semibold capitalize text-warm-900">
+          {monthLabel}
+        </h2>
         <button
           type="button"
           onClick={nextMonth}
           aria-label="Bulan berikutnya"
-          className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="rounded-lg p-2 text-warm-500 transition-colors hover:bg-warm-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
         >
           <svg
             className="h-5 w-5"
@@ -235,40 +245,40 @@ export default function CalendarPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </button>
-      </div>
+      </motion.div>
 
       {/* Legend */}
-      <div className="mb-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
+      <motion.div variants={staggerItem} className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
         {[
-          { color: 'bg-red-200', label: 'Hari Libur Nasional' },
-          { color: 'bg-amber-100 border border-amber-200', label: 'Promo' },
-          { color: 'bg-red-100 border border-red-200', label: 'Libur / Tutup' },
-          { color: 'bg-indigo-100 border border-indigo-200', label: 'Lainnya' },
+          { color: 'bg-danger-200', label: 'Hari Libur Nasional' },
+          { color: 'bg-primary-100 border border-primary-200', label: 'Promo' },
+          { color: 'bg-danger-100 border border-danger-200', label: 'Libur / Tutup' },
+          { color: 'bg-accent-100 border border-accent-200', label: 'Lainnya' },
         ].map(({ color, label }) => (
           <span key={label} className="flex items-center gap-1.5">
             <span className={`h-2.5 w-2.5 flex-shrink-0 rounded-sm ${color}`} />
-            <span className="text-gray-600">{label}</span>
+            <span className="text-warm-600">{label}</span>
           </span>
         ))}
-      </div>
+      </motion.div>
 
       {/* Error */}
       {isError && (
         <div
           role="alert"
-          className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="rounded-xl border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700"
         >
           Gagal memuat kalender. Periksa koneksi dan coba lagi.
         </div>
       )}
 
       {/* ── GRID CALENDAR (md+) ─────────────────────────────────────────── */}
-      <div className="hidden md:block">
+      <motion.div variants={staggerItem} className="hidden md:block">
         <div className="mb-1 grid grid-cols-7 gap-1">
           {DAY_LABELS.map((d) => (
             <div
               key={d}
-              className="py-1 text-center text-xs font-medium uppercase tracking-wide text-gray-400"
+              className="py-1 text-center text-xs font-medium uppercase tracking-wide text-warm-400"
             >
               {d}
             </div>
@@ -283,7 +293,7 @@ export default function CalendarPage() {
               <div
                 key={`b${i}`}
                 aria-hidden="true"
-                className="min-h-[5rem] rounded-lg bg-gray-50/50"
+                className="min-h-[5rem] rounded-lg bg-warm-50/60"
               />
             ))}
 
@@ -300,8 +310,8 @@ export default function CalendarPage() {
                   className={[
                     'group min-h-[5rem] cursor-pointer rounded-lg border p-1.5 transition-colors',
                     isToday
-                      ? 'border-indigo-400 bg-indigo-50/60'
-                      : 'border-gray-100 bg-white hover:bg-gray-50',
+                      ? 'border-primary-300 bg-primary-50/60'
+                      : 'border-warm-100 bg-white/70 hover:bg-warm-50/80',
                   ].join(' ')}
                   onClick={() => setDialog({ kind: 'create', prefillDate: dayStr })}
                 >
@@ -309,7 +319,7 @@ export default function CalendarPage() {
                     <span
                       className={[
                         'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
-                        isToday ? 'bg-indigo-600 text-white' : 'text-gray-700',
+                        isToday ? 'bg-primary-600 text-white' : 'text-warm-700',
                       ].join(' ')}
                     >
                       {day}
@@ -321,7 +331,7 @@ export default function CalendarPage() {
                       key={h.name}
                       title={h.name}
                       onClick={(e) => e.stopPropagation()}
-                      className="mb-0.5 truncate rounded px-1 py-0.5 text-[10px] font-medium bg-red-200 text-red-800 cursor-default"
+                      className="mb-0.5 truncate rounded px-1 py-0.5 text-[10px] font-medium bg-danger-200 text-danger-800 cursor-default"
                     >
                       {h.name}
                     </div>
@@ -344,21 +354,21 @@ export default function CalendarPage() {
                     </div>
                   ))}
                   {dayEvents.length > 2 && (
-                    <div className="text-[10px] text-gray-400">+{dayEvents.length - 2} lainnya</div>
+                    <div className="text-[10px] text-warm-400">+{dayEvents.length - 2} lainnya</div>
                   )}
                 </div>
               );
             })}
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* ── MOBILE LIST (< md) ──────────────────────────────────────────── */}
-      <div className="md:hidden">
+      <motion.div variants={staggerItem} className="md:hidden">
         {isLoading ? (
-          <div className="space-y-2 animate-pulse" aria-hidden="true">
+          <div className="animate-pulse space-y-2" aria-hidden="true">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-16 rounded-xl bg-gray-100" />
+              <div key={i} className="h-16 rounded-xl bg-warm-100" />
             ))}
           </div>
         ) : (
@@ -370,17 +380,17 @@ export default function CalendarPage() {
               if (dayHolidays.length === 0 && dayEvents.length === 0) return null;
               const isToday = dayStr === today;
               return (
-                <div key={dayStr} className="rounded-xl border border-gray-100 bg-white p-3">
+                <div key={dayStr} className="rounded-xl border border-warm-100 bg-white/80 p-3">
                   <div className="mb-2 flex items-center gap-2">
                     <span
                       className={[
                         'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold',
-                        isToday ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700',
+                        isToday ? 'bg-primary-600 text-white' : 'bg-warm-100 text-warm-700',
                       ].join(' ')}
                     >
                       {day}
                     </span>
-                    <span className="text-xs font-medium text-gray-500 capitalize">
+                    <span className="text-xs font-medium capitalize text-warm-500">
                       {formatDayLabel(year, month, day)}
                     </span>
                   </div>
@@ -388,11 +398,11 @@ export default function CalendarPage() {
                     {dayHolidays.map((h) => (
                       <div key={h.name} className="flex items-center gap-2">
                         <span
-                          className="h-2 w-2 flex-shrink-0 rounded-full bg-red-400"
+                          className="h-2 w-2 flex-shrink-0 rounded-full bg-danger-400"
                           aria-hidden="true"
                         />
-                        <span className="text-xs text-red-700">{h.name}</span>
-                        <span className="ml-auto text-[10px] text-gray-400">Libur Nasional</span>
+                        <span className="text-xs text-danger-700">{h.name}</span>
+                        <span className="ml-auto text-[10px] text-warm-400">Libur Nasional</span>
                       </div>
                     ))}
                     {dayEvents.map((ev) => (
@@ -400,14 +410,14 @@ export default function CalendarPage() {
                         key={ev.id}
                         type="button"
                         onClick={() => setDialog({ kind: 'edit', event: ev })}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1 hover:bg-gray-50 transition-colors text-left"
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1 text-left transition-colors hover:bg-warm-50"
                       >
                         <span
                           className={`h-2 w-2 flex-shrink-0 rounded-full ${typeDot(ev.type)}`}
                           aria-hidden="true"
                         />
-                        <span className="flex-1 truncate text-xs text-gray-800">{ev.name}</span>
-                        <span className="text-[10px] text-gray-400">{typeLabel(ev.type)}</span>
+                        <span className="flex-1 truncate text-xs text-warm-800">{ev.name}</span>
+                        <span className="text-[10px] text-warm-400">{typeLabel(ev.type)}</span>
                       </button>
                     ))}
                   </div>
@@ -417,11 +427,11 @@ export default function CalendarPage() {
 
             {events.length === 0 && holidays.length === 0 && (
               <div className="py-12 text-center">
-                <p className="text-sm text-gray-400 mb-2">Belum ada acara di bulan ini.</p>
+                <p className="mb-2 text-sm text-warm-400">Belum ada acara di bulan ini.</p>
                 <button
                   type="button"
                   onClick={() => setDialog({ kind: 'create' })}
-                  className="text-sm font-medium text-indigo-600 hover:underline"
+                  className="text-sm font-medium text-primary-600 hover:underline"
                 >
                   + Tambah Event
                 </button>
@@ -429,12 +439,12 @@ export default function CalendarPage() {
             )}
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* ── EVENT LIST BELOW GRID ─────────────────────────────────────────── */}
       {!isLoading && events.length > 0 && (
-        <div className="mt-6 hidden md:block">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <motion.div variants={staggerItem} className="hidden md:block">
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-warm-400">
             Acara Bulan Ini
           </h3>
           <ul className="space-y-0.5" aria-label="Daftar acara">
@@ -443,17 +453,17 @@ export default function CalendarPage() {
                 <button
                   type="button"
                   onClick={() => setDialog({ kind: 'edit', event: ev })}
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left hover:bg-gray-50 transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  className="group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors hover:bg-warm-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
                 >
                   <span
                     className={`h-2.5 w-2.5 flex-shrink-0 rounded-full ${typeDot(ev.type)}`}
                     aria-hidden="true"
                   />
-                  <span className="flex-1 min-w-0">
-                    <span className="block truncate text-sm font-medium text-gray-800 group-hover:text-indigo-700">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium text-warm-800 group-hover:text-primary-700">
                       {ev.name}
                     </span>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-warm-400">
                       {formatDateRange(ev.start_date, ev.end_date)}
                     </span>
                   </span>
@@ -469,7 +479,7 @@ export default function CalendarPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       )}
 
       {/* ── DIALOG ──────────────────────────────────────────────────────── */}
@@ -483,6 +493,6 @@ export default function CalendarPage() {
           isDeleting={deleteMut.isPending}
         />
       )}
-    </div>
+    </motion.div>
   );
 }

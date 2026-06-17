@@ -6,6 +6,7 @@ import TransactionDetailModal from '@/features/sales/TransactionDetailModal';
 import DeleteTransactionDialog from '@/features/sales/DeleteTransactionDialog';
 import ImportModal from '@/features/sales/ImportModal';
 import Button from '@/components/ui/Button';
+import { stagger, staggerItem } from '@/lib/motion';
 import type { Transaction } from '@/features/sales/types';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -28,14 +29,14 @@ const STATUS_LABEL: Record<string, string> = {
   failed: 'Gagal',
 };
 const STATUS_CLASS: Record<string, string> = {
-  success: 'bg-emerald-100 text-emerald-700',
-  pending: 'bg-amber-100 text-amber-700',
-  failed: 'bg-red-100 text-red-700',
+  success: 'bg-success-100 text-success-700',
+  pending: 'bg-primary-100 text-primary-700',
+  failed: 'bg-danger-100 text-danger-600',
 };
 const PAYMENT_CLASS: Record<string, string> = {
-  Cash: 'bg-blue-100 text-blue-700',
-  Transfer: 'bg-purple-100 text-purple-700',
-  QRIS: 'bg-orange-100 text-orange-700',
+  Cash: 'bg-warm-100 text-warm-700',
+  Transfer: 'bg-accent-100 text-accent-700',
+  QRIS: 'bg-secondary-100 text-secondary-700',
 };
 
 // ─── Skeleton row ─────────────────────────────────────────────────────────────
@@ -43,13 +44,26 @@ const PAYMENT_CLASS: Record<string, string> = {
 function SkeletonRow() {
   return (
     <tr className="animate-pulse">
-      {[48, 72, 120, 72, 72, 96].map((w, i) => (
-        <td key={i} className="px-4 py-3">
-          <div className="h-4 rounded bg-gray-200" style={{ width: w }} />
-        </td>
-      ))}
       <td className="px-4 py-3">
-        <div className="h-7 w-16 rounded-lg bg-gray-200" />
+        <div className="h-4 w-12 rounded bg-warm-200" />
+      </td>
+      <td className="px-4 py-3">
+        <div className="h-4 w-20 rounded bg-warm-200" />
+      </td>
+      <td className="px-4 py-3">
+        <div className="h-4 w-[120px] rounded bg-warm-200" />
+      </td>
+      <td className="px-4 py-3">
+        <div className="h-4 w-20 rounded bg-warm-200" />
+      </td>
+      <td className="px-4 py-3">
+        <div className="h-4 w-20 rounded bg-warm-200" />
+      </td>
+      <td className="px-4 py-3">
+        <div className="h-4 w-24 rounded bg-warm-200" />
+      </td>
+      <td className="px-4 py-3">
+        <div className="h-7 w-16 rounded-lg bg-warm-200" />
       </td>
     </tr>
   );
@@ -125,12 +139,15 @@ export default function SalesPage() {
   const meta = data?.meta;
 
   return (
-    <div className="min-h-screen p-6">
+    <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <motion.div
+        variants={staggerItem}
+        className="flex flex-wrap items-center justify-between gap-3"
+      >
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Data Penjualan</h1>
-          {meta && <p className="mt-0.5 text-sm text-gray-500">{meta.total} transaksi ditemukan</p>}
+          <h1 className="font-display text-2xl font-bold text-warm-900">Data Penjualan</h1>
+          {meta && <p className="mt-0.5 text-sm text-warm-500">{meta.total} transaksi ditemukan</p>}
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" onClick={() => setShowImport(true)}>
@@ -162,13 +179,12 @@ export default function SalesPage() {
             Tambah Transaksi
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Filters */}
-      <div className="mb-5 flex flex-wrap gap-3">
-        {/* Date from */}
+      <motion.div variants={staggerItem} className="flex flex-wrap gap-3">
         <div className="flex flex-col gap-1">
-          <label htmlFor="date-from" className="text-xs font-medium text-gray-500">
+          <label htmlFor="date-from" className="text-xs font-medium text-warm-500">
             Dari tanggal
           </label>
           <input
@@ -177,13 +193,12 @@ export default function SalesPage() {
             value={dateFrom}
             max={dateTo || undefined}
             onChange={(e) => setDateFrom(e.target.value)}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="rounded-lg border border-warm-300 bg-white/80 px-3 py-2 text-sm text-warm-700 shadow-warm-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-accent-500"
           />
         </div>
 
-        {/* Date to */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="date-to" className="text-xs font-medium text-gray-500">
+          <label htmlFor="date-to" className="text-xs font-medium text-warm-500">
             Sampai tanggal
           </label>
           <input
@@ -192,20 +207,19 @@ export default function SalesPage() {
             value={dateTo}
             min={dateFrom || undefined}
             onChange={(e) => setDateTo(e.target.value)}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="rounded-lg border border-warm-300 bg-white/80 px-3 py-2 text-sm text-warm-700 shadow-warm-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-accent-500"
           />
         </div>
 
-        {/* Status */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="status-filter" className="text-xs font-medium text-gray-500">
+          <label htmlFor="status-filter" className="text-xs font-medium text-warm-500">
             Status
           </label>
           <select
             id="status-filter"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            className="rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-8 text-sm text-gray-700 shadow-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="rounded-lg border border-warm-300 bg-white/80 py-2 pl-3 pr-8 text-sm text-warm-700 shadow-warm-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-accent-500"
           >
             <option value="">Semua Status</option>
             <option value="success">Berhasil</option>
@@ -214,7 +228,6 @@ export default function SalesPage() {
           </select>
         </div>
 
-        {/* Clear filters */}
         {(dateFrom || dateTo || statusFilter) && (
           <div className="flex items-end">
             <button
@@ -224,63 +237,56 @@ export default function SalesPage() {
                 setDateTo('');
                 setStatusFilter('');
               }}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+              className="rounded-lg border border-warm-200 px-3 py-2 text-sm text-warm-500 transition-colors hover:bg-warm-50 hover:text-warm-700"
             >
               Reset filter
             </button>
           </div>
         )}
 
-        {/* Fetching indicator */}
         {isFetching && !isPending && (
           <div className="flex items-end pb-2">
             <span
               aria-hidden="true"
-              className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent"
+              className="h-4 w-4 animate-spin rounded-full border-2 border-primary-400 border-t-transparent"
             />
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <motion.div
+        variants={staggerItem}
+        className="glass-card shadow-card rounded-card overflow-hidden"
+      >
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
-            <thead className="border-b border-gray-100 bg-gray-50">
+            <thead className="border-b border-warm-200 bg-warm-50/80">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  #ID
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Tanggal
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Pelanggan
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Metode
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Total
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Aksi
-                </th>
+                {['#ID', 'Tanggal', 'Pelanggan', 'Metode', 'Status', 'Total', 'Aksi'].map(
+                  (col, i) => (
+                    <th
+                      key={col}
+                      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-warm-500 ${
+                        i === 5 ? 'text-right' : i === 6 ? 'text-center' : 'text-left'
+                      }`}
+                    >
+                      {col}
+                    </th>
+                  )
+                )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-warm-100">
               {isPending ? (
                 Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)
               ) : transactions.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-20 text-center">
                     <div className="flex flex-col items-center">
-                      <div className="mb-4 rounded-full bg-gray-100 p-5">
+                      <div className="mb-4 rounded-full bg-warm-100 p-5">
                         <svg
-                          className="h-9 w-9 text-gray-400"
+                          className="h-9 w-9 text-warm-400"
                           fill="none"
                           stroke="currentColor"
                           strokeWidth={1.5}
@@ -293,12 +299,12 @@ export default function SalesPage() {
                           />
                         </svg>
                       </div>
-                      <p className="text-base font-semibold text-gray-900">
+                      <p className="text-base font-semibold text-warm-900">
                         {dateFrom || dateTo || statusFilter
                           ? 'Transaksi tidak ditemukan'
                           : 'Belum ada transaksi'}
                       </p>
-                      <p className="mt-1 max-w-xs text-sm text-gray-500">
+                      <p className="mt-1 max-w-xs text-sm text-warm-500">
                         {dateFrom || dateTo || statusFilter
                           ? 'Coba ubah filter pencarian.'
                           : 'Mulai dengan menambahkan transaksi pertama.'}
@@ -316,35 +322,35 @@ export default function SalesPage() {
                   <tr
                     key={tx.id}
                     onClick={() => setViewTransaction(tx)}
-                    className="cursor-pointer transition-colors hover:bg-indigo-50/60"
+                    className="cursor-pointer transition-colors hover:bg-primary-50/40"
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-gray-500">#{tx.id}</td>
-                    <td className="px-4 py-3 text-gray-700">{formatDate(tx.transaction_date)}</td>
-                    <td className="max-w-[140px] truncate px-4 py-3 text-gray-900">
-                      {tx.customer_name || <span className="text-gray-400">—</span>}
+                    <td className="px-4 py-3 font-mono text-xs text-warm-400">#{tx.id}</td>
+                    <td className="px-4 py-3 text-warm-600">{formatDate(tx.transaction_date)}</td>
+                    <td className="max-w-[140px] truncate px-4 py-3 text-warm-900">
+                      {tx.customer_name || <span className="text-warm-400">—</span>}
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${PAYMENT_CLASS[tx.payment_method] ?? 'bg-gray-100 text-gray-600'}`}
+                        className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${PAYMENT_CLASS[tx.payment_method] ?? 'bg-warm-100 text-warm-600'}`}
                       >
                         {tx.payment_method}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_CLASS[tx.status] ?? 'bg-gray-100 text-gray-600'}`}
+                        className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_CLASS[tx.status] ?? 'bg-warm-100 text-warm-600'}`}
                       >
                         {STATUS_LABEL[tx.status] ?? tx.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold text-gray-900">
+                    <td className="px-4 py-3 text-right font-semibold text-warm-900">
                       {formatRupiah(tx.total_amount)}
                     </td>
                     <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
                         onClick={() => setViewTransaction(tx)}
-                        className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100"
+                        className="rounded-lg border border-warm-200 px-2.5 py-1 text-xs font-medium text-warm-600 transition-colors hover:bg-warm-50"
                       >
                         Detail
                       </button>
@@ -355,16 +361,16 @@ export default function SalesPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
 
       {/* Pagination */}
       {meta && meta.last_page > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-2">
+        <motion.div variants={staggerItem} className="flex items-center justify-center gap-2">
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1 || isFetching}
-            className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-1 rounded-lg border border-warm-200 px-3 py-2 text-sm font-medium text-warm-600 transition-colors hover:bg-warm-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <svg
               className="h-4 w-4"
@@ -377,14 +383,14 @@ export default function SalesPage() {
             </svg>
             Sebelumnya
           </button>
-          <span className="px-2 text-sm text-gray-500">
+          <span className="px-2 text-sm text-warm-500">
             {page} / {meta.last_page}
           </span>
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
             disabled={page === meta.last_page || isFetching}
-            className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex items-center gap-1 rounded-lg border border-warm-200 px-3 py-2 text-sm font-medium text-warm-600 transition-colors hover:bg-warm-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Berikutnya
             <svg
@@ -397,7 +403,7 @@ export default function SalesPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </button>
-        </div>
+        </motion.div>
       )}
 
       {/* Modals */}
@@ -437,8 +443,8 @@ export default function SalesPage() {
             transition={{ duration: 0.2 }}
             role="status"
             aria-live="polite"
-            className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg ${
-              toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+            className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-warm-lg ${
+              toast.type === 'success' ? 'bg-success-600' : 'bg-danger-600'
             }`}
           >
             {toast.type === 'success' ? (
@@ -470,6 +476,6 @@ export default function SalesPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }

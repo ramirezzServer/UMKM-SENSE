@@ -8,6 +8,7 @@ import PredictionPolling from '@/features/analytics/PredictionPolling';
 import PredictionResult from '@/features/analytics/PredictionResult';
 import type { PredictionDetail } from '@/features/analytics/types';
 import Button from '@/components/ui/Button';
+import { fadeInUp, stagger, staggerItem } from '@/lib/motion';
 
 // ─── Page-level state machine ─────────────────────────────────────────────────
 
@@ -16,27 +17,6 @@ type Phase =
   | { kind: 'polling'; predictionId: number }
   | { kind: 'done'; result: PredictionDetail }
   | { kind: 'failed'; error: string | null };
-
-// ─── Icon ─────────────────────────────────────────────────────────────────────
-
-function IconSparkles() {
-  return (
-    <svg
-      className="h-6 w-6 text-indigo-600"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.75}
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-      />
-    </svg>
-  );
-}
 
 // ─── Failed state ─────────────────────────────────────────────────────────────
 
@@ -50,9 +30,9 @@ function FailedState({ error, onRetry }: { error: string | null; onRetry: () => 
       transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="flex flex-col items-center gap-5 py-10 text-center"
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-danger-50">
         <svg
-          className="h-7 w-7 text-red-500"
+          className="h-7 w-7 text-danger-500"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -67,8 +47,8 @@ function FailedState({ error, onRetry }: { error: string | null; onRetry: () => 
         </svg>
       </div>
       <div className="space-y-1.5">
-        <p className="text-base font-semibold text-gray-800">Analisis Gagal</p>
-        <p className="max-w-xs text-sm text-gray-500">
+        <p className="text-base font-semibold text-warm-800">Analisis Gagal</p>
+        <p className="max-w-xs text-sm text-warm-500">
           {error ?? 'Layanan prediksi tidak tersedia saat ini. Silakan coba lagi nanti.'}
         </p>
       </div>
@@ -84,7 +64,6 @@ function FailedState({ error, onRetry }: { error: string | null; onRetry: () => 
 export default function AnalyticsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Derive initial phase from URL so navigation doesn't reset the state
   const [phase, setPhase] = useState<Phase>(() => {
     const raw = searchParams.get('prediction');
     if (raw) {
@@ -99,7 +78,6 @@ export default function AnalyticsPage() {
   const pollingId = phase.kind === 'polling' ? phase.predictionId : null;
   const { data: statusData, isError: statusIsError } = usePredictionStatus(pollingId);
 
-  // Transition from polling → done / failed when status updates
   useEffect(() => {
     if (phase.kind !== 'polling' || !statusData) return;
     if (statusData.status === 'done') {
@@ -109,7 +87,6 @@ export default function AnalyticsPage() {
     }
   }, [statusData, phase.kind]);
 
-  // Invalid / 404 prediction ID → clear URL param and fall back to form
   useEffect(() => {
     if (phase.kind !== 'polling' || !statusIsError) return;
     setSearchParams({}, { replace: true });
@@ -137,30 +114,41 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <motion.div
+      variants={stagger}
+      initial="hidden"
+      animate="visible"
+      className="mx-auto max-w-2xl space-y-6"
+    >
       {/* Page header */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-50">
-            <IconSparkles />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Analisis Cerdas</h1>
-            <p className="text-sm text-gray-500">
-              Prediksi penjualan berbasis data historis & faktor eksternal
-            </p>
-          </div>
+      <motion.div variants={staggerItem} className="flex items-center gap-3">
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-accent-50">
+          <svg
+            className="h-6 w-6 text-accent-600"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+            />
+          </svg>
+        </div>
+        <div>
+          <h1 className="font-display text-2xl font-bold text-warm-900">Analisis Cerdas</h1>
+          <p className="text-sm text-warm-500">
+            Prediksi penjualan berbasis data historis &amp; faktor eksternal
+          </p>
         </div>
       </motion.div>
 
       {/* Card shell */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <motion.div variants={staggerItem} className="glass-card rounded-card shadow-card p-6">
         <AnimatePresence mode="wait" initial={false}>
-          {/* ── Idle: show form ── */}
           {phase.kind === 'idle' && (
             <motion.div
               key="form"
@@ -169,42 +157,40 @@ export default function AnalyticsPage() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <p className="mb-5 text-sm font-medium text-gray-700">Konfigurasi Prediksi</p>
+              <p className="mb-5 text-sm font-medium text-warm-700">Konfigurasi Prediksi</p>
               <PredictionForm onSubmit={handleSubmit} isSubmitting={createMutation.isPending} />
             </motion.div>
           )}
 
-          {/* ── Polling: show loading ── */}
           {phase.kind === 'polling' && (
             <PredictionPolling
               status={statusData?.status === 'processing' ? 'processing' : 'pending'}
             />
           )}
 
-          {/* ── Done: show results ── */}
           {phase.kind === 'done' && (
             <PredictionResult prediction={phase.result} onReset={handleReset} />
           )}
 
-          {/* ── Failed: show error ── */}
           {phase.kind === 'failed' && <FailedState error={phase.error} onRetry={handleReset} />}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {/* Non-blocking note during polling */}
       <AnimatePresence>
         {phase.kind === 'polling' && (
           <motion.p
             key="nav-hint"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            variants={fadeInUp}
+            initial="hidden"
+            animate="visible"
             exit={{ opacity: 0 }}
-            className="text-center text-xs text-gray-400"
+            className="text-center text-xs text-warm-400"
           >
             Proses berjalan di latar belakang — Anda bebas berpindah halaman dan kembali ke sini.
           </motion.p>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
