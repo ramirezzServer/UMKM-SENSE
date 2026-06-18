@@ -8,14 +8,17 @@ UMKM-Sense membantu pelaku usaha kecil dan menengah membuat keputusan bisnis yan
 
 ## Fitur Utama
 
+- **Landing page publik imersif** — halaman "/" dengan latar berlapis bermakna UMKM: grafik tren SVG, partikel koin Rupiah, siluet kota/pasar, dan objek 3D interaktif (React Three Fiber); paralaks mouse & scroll
+- **Design system "Pasar Modern"** — palet amber/teal/indigo + warm stone, tipografi Plus Jakarta Sans, warm shadows, animasi Framer Motion; primitif tersedia di `src/lib/motion.ts`; halaman referensi di `/dev/styleguide`
+- **Autentikasi aman & on-brand** — login/register/reset kata sandi via Sanctum SPA; halaman auth bergaya minimal dengan palet Pasar Modern (tanpa elemen imersif)
+- **Profil Usaha** — halaman `/profile-business` untuk melihat dan memperbarui nama usaha, kategori, dan kecamatan; tersambung ke `GET/PUT /api/profile`
 - **Manajemen produk & transaksi** — CRUD lengkap dengan validasi kepemilikan per user
 - **Import transaksi massal** — unggah CSV dengan pratinjau validasi sebelum konfirmasi
-- **Dashboard analitik** — ringkasan penjualan hari ini, tren 7 hari, produk terlaris, kondisi cuaca
+- **Dashboard analitik** — ringkasan penjualan hari ini, tren 7 hari, produk terlaris, kondisi cuaca, dan prediksi besok
 - **Prediksi penjualan AI** — pilih produk + rentang tanggal (maks 14 hari), sistem memilih model terbaik (Prophet / ARIMA / WMA) secara otomatis
 - **Rekomendasi & peringatan otomatis** — hasil prediksi disertai rekomendasi berprioritas (high/medium/low) dan peringatan kualitas data
 - **Riwayat prediksi** — daftar dan detail semua prediksi yang pernah dibuat
 - **Kalender event** — libur nasional Indonesia + event lokal kustom yang memengaruhi prediksi
-- **Autentikasi aman** — login/register via Sanctum SPA, reset kata sandi dengan OTP
 
 ---
 
@@ -29,7 +32,7 @@ UMKM-Sense membantu pelaku usaha kecil dan menengah membuat keputusan bisnis yan
                        │ HTTP / Sanctum cookie-auth
                        ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  Laravel 11 API  (apps/api)                                     │
+│  Laravel 12 API  (apps/api)                                     │
 │                                                                 │
 │  ┌─────────────┐   202 Accepted    ┌──────────────────────┐    │
 │  │  Controller │ ──────────────►   │  Database Queue      │    │
@@ -47,7 +50,7 @@ UMKM-Sense membantu pelaku usaha kecil dan menengah membuat keputusan bisnis yan
 │  │  PredictionLog → status: done                               │
 │  └─────────────────────────────────────────────────────────────┘
 │                       │
-│          PostgreSQL 16 (Docker)                                 │
+│          PostgreSQL 16 + Redis 7 (Docker)                       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -57,15 +60,16 @@ UMKM-Sense membantu pelaku usaha kecil dan menengah membuat keputusan bisnis yan
 
 ## Tech Stack
 
-| Layer             | Teknologi                                                                                |
-| ----------------- | ---------------------------------------------------------------------------------------- |
-| Frontend          | React 19, Vite, TypeScript, TanStack Query, TanStack Router, Tailwind CSS, Framer Motion |
-| Backend API       | Laravel 11, PHP 8.2+, Sanctum SPA Auth, Eloquent, Policies                               |
-| Queue / Job       | Laravel Queue — database driver (PostgreSQL)                                             |
-| Microservice AI   | Python 3.13, FastAPI, Prophet, ARIMA (statsmodels), WMA                                  |
-| Database          | PostgreSQL 16 (Docker)                                                                   |
-| Cache & Scheduler | Laravel Cache (database driver) + Laravel Scheduler                                      |
-| Monorepo          | Turborepo + pnpm workspaces                                                              |
+| Layer             | Teknologi                                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
+| Frontend          | React 19, Vite 6, TypeScript 5, React Router 7, TanStack Query 5, Tailwind CSS 3, Framer Motion 11, Recharts 3 |
+| 3D (landing)      | Three.js 0.184, @react-three/fiber 9, @react-three/drei 10                                                     |
+| Backend API       | Laravel 12, PHP 8.2+, Sanctum SPA Auth, Eloquent, Policies                                                     |
+| Queue / Job       | Laravel Queue — database driver (PostgreSQL)                                                                   |
+| Microservice AI   | Python 3.12+, FastAPI 0.136, Prophet 1.3, statsmodels 0.14 (ARIMA), scikit-learn 1.9, WMA (custom)             |
+| Database          | PostgreSQL 16 (Docker)                                                                                         |
+| Cache & Scheduler | Laravel Cache (database driver) + Laravel Scheduler                                                            |
+| Monorepo          | Turborepo 2 + pnpm 9 workspaces                                                                                |
 
 ---
 
@@ -77,7 +81,7 @@ UMKM-Sense membantu pelaku usaha kecil dan menengah membuat keputusan bisnis yan
 | pnpm           | 9.x           | `npm i -g pnpm`    |
 | PHP            | 8.2+          | `php -v`           |
 | Composer       | 2.x           | `composer -V`      |
-| Python         | 3.13+         | `python --version` |
+| Python         | 3.12+         | `python --version` |
 | Docker Desktop | terbaru       | postgres + redis   |
 
 ---
@@ -224,20 +228,20 @@ Perintah ini menjalankan 4 service secara paralel:
 
 Buka **http://localhost:5173** di browser dan login dengan akun demo.
 
-> **Catatan Windows:** `pnpm run dev:all` sudah menggunakan `python.exe -m uvicorn`. Pastikan virtual env `services/predict/.venv` sudah dibuat dan `pip install` sudah dijalankan. Jika `PREDICT` gagal start, aktifkan venv manual lalu jalankan `uvicorn app.main:app --reload --port 8001` dari direktori `services/predict`.
+> **Catatan Windows:** `pnpm run dev:all` sudah menggunakan `.venv\Scripts\python.exe -m uvicorn`. Pastikan virtual env `services/predict/.venv` sudah dibuat dan `pip install` sudah dijalankan. Jika `PREDICT` gagal start, aktifkan venv manual lalu jalankan `uvicorn app.main:app --reload --port 8001` dari direktori `services/predict`.
 
 ---
 
 ## Menjalankan Test
 
-### Laravel (148 test)
+### Laravel (148 test, 420 assertions)
 
 ```powershell
 cd apps\api
 php artisan test
 ```
 
-Suite mencakup: autentikasi, transaksi CRUD, import CSV, prediksi (endpoint + job async), keamanan/ownership antar-user, edge cases, cuaca, libur nasional.
+Suite mencakup: autentikasi, profil usaha, transaksi CRUD, import CSV, prediksi (endpoint + job async), keamanan/ownership antar-user, edge cases, cuaca, libur nasional.
 
 Test spesifik:
 
@@ -247,13 +251,15 @@ php artisan test --filter="WeatherTest"
 php artisan test --filter="DashboardTest"
 ```
 
-### FastAPI / Python
+### FastAPI / Python (80 test functions, 2 modul)
 
 ```powershell
 cd services\predict
 .venv\Scripts\activate
 pytest -v --tb=short
 ```
+
+Suite mencakup: forecast service (Prophet/ARIMA/WMA, mocked) dan recommendation engine.
 
 ### Frontend (type-check + build)
 
@@ -270,11 +276,22 @@ umkm-sense/
 ├── apps/
 │   ├── web/              React 19 + Vite + TypeScript (SPA)
 │   │   └── src/
-│   │       ├── features/ modul per domain (auth, dashboard, analytics, …)
-│   │       └── routes/   halaman per route
-│   └── api/              Laravel 11 REST API
+│   │       ├── components/   komponen global (Button, Input, layout)
+│   │       ├── features/     modul per domain:
+│   │       │   ├── auth/       login, register, hooks, types
+│   │       │   ├── dashboard/  summary, trend chart, prediksi besok
+│   │       │   ├── products/   CRUD produk
+│   │       │   ├── sales/      transaksi, import CSV
+│   │       │   ├── analytics/  grafik & analitik
+│   │       │   ├── profile/    update profil usaha (hooks, api)
+│   │       │   └── landing/    scene 3D (Three.js), background imersif
+│   │       ├── lib/          motion.ts, api.ts, queryClient, errors
+│   │       └── routes/       halaman per route (landing, login, register,
+│   │                         dashboard, products, sales, analytics,
+│   │                         predictions, calendar, profile-business, …)
+│   └── api/              Laravel 12 REST API
 │       ├── app/
-│       │   ├── Http/     Controllers, Middleware, Requests
+│       │   ├── Http/     Controllers, Middleware, Requests, Resources
 │       │   ├── Jobs/     RunPredictionJob (queue)
 │       │   ├── Models/   Eloquent models
 │       │   └── Services/ WeatherService, HolidayService, …
@@ -285,17 +302,43 @@ umkm-sense/
 │       │   ├── api.php
 │       │   └── console.php  Laravel Scheduler (weather:sync, holidays:sync)
 │       └── tests/Feature/   148 test
+├── packages/
+│   └── shared/           Zod schemas & TypeScript types bersama (web ↔ api)
 ├── services/
-│   └── predict/          Python 3.13 FastAPI
+│   └── predict/          Python 3.12+ FastAPI
 │       ├── app/
-│       │   ├── forecasting/  Prophet, ARIMA, WMA
+│       │   ├── forecasting/      Prophet, ARIMA, WMA
 │       │   └── recommendations/  rule-based engine
-│       └── tests/            unit tests
+│       └── tests/                80 test functions (2 modul)
 ├── docker-compose.yml    PostgreSQL 16 + Redis 7
 ├── turbo.json
 ├── pnpm-workspace.yaml
 └── package.json
 ```
+
+---
+
+## Endpoint API (ringkasan)
+
+Semua endpoint kecuali `/health`, `/districts`, dan auth publik memerlukan autentikasi Sanctum.
+
+| Method                | Path                                                                           | Keterangan                        |
+| --------------------- | ------------------------------------------------------------------------------ | --------------------------------- |
+| `GET`                 | `/api/health`                                                                  | Cek status API                    |
+| `GET`                 | `/api/districts`                                                               | Daftar kecamatan (publik)         |
+| `POST`                | `/api/register` / `/api/login` / `/api/logout`                                 | Auth                              |
+| `POST`                | `/api/forgot-password` / `/api/verify-otp` / `/api/reset-password`             | Reset kata sandi                  |
+| `GET`                 | `/api/me`                                                                      | Data user + bisnis saat ini       |
+| `GET` / `PUT`         | `/api/profile`                                                                 | Profil usaha (lihat & perbarui)   |
+| `GET/POST/PUT/DELETE` | `/api/products`                                                                | CRUD produk                       |
+| `GET/POST/PUT/DELETE` | `/api/transactions`                                                            | CRUD transaksi                    |
+| `GET/POST/POST`       | `/api/transactions/import/template\|preview\|confirm`                          | Import CSV                        |
+| `GET`                 | `/api/dashboard/summary\|trend\|top-products\|conditions\|tomorrow-prediction` | Data dashboard                    |
+| `GET/POST/GET/GET`    | `/api/predictions` (index, store, show, status)                                | Prediksi AI                       |
+| `GET`                 | `/api/calendar`                                                                | Kalender gabungan (libur + event) |
+| `GET/POST/PUT/DELETE` | `/api/events`                                                                  | Event lokal kustom                |
+| `GET`                 | `/api/weather/today`                                                           | Cuaca hari ini                    |
+| `GET`                 | `/api/holidays`                                                                | Libur nasional                    |
 
 ---
 
