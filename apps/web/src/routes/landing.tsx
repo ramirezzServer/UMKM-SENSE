@@ -280,24 +280,23 @@ function HeroSection() {
 
           {/* CTAs */}
           <motion.div
-            className="mt-8 flex flex-wrap gap-3"
+            className="mt-8"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: EASE, delay: 0.26 }}
           >
-            <Link
-              to="/register"
-              className="flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-warm-md hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 transition-colors"
+            {/* In-page navigation only — conversion happens via the sticky nav */}
+            <a
+              href="#fitur"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('fitur')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="inline-flex items-center gap-2 rounded-xl border border-warm-300 bg-white/70 px-6 py-3 text-sm font-semibold text-warm-700 shadow-warm-sm hover:bg-warm-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 transition-colors"
             >
-              Coba Gratis Sekarang
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              to="/login"
-              className="flex items-center gap-2 rounded-xl border border-warm-300 bg-white px-6 py-3 text-sm font-semibold text-warm-700 shadow-warm-sm hover:bg-warm-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 transition-colors"
-            >
-              Masuk
-            </Link>
+              Lihat Fitur
+              <ChevronRight className="h-4 w-4" />
+            </a>
           </motion.div>
 
           {/* Trust badges */}
@@ -681,6 +680,8 @@ function WhySection() {
 // ─── CTA ─────────────────────────────────────────────────────────────────────
 
 function CtaSection() {
+  const { data: user } = useAuth();
+
   return (
     <section className="relative isolate overflow-hidden py-28">
       {/* Dark warm gradient bg */}
@@ -697,7 +698,7 @@ function CtaSection() {
           variants={staggerItem}
           className="mb-4 text-xs font-semibold uppercase tracking-widest text-primary-300"
         >
-          Mulai Hari Ini · Gratis
+          {user ? 'Dashboard Anda Menunggu' : 'Mulai Hari Ini · Gratis'}
         </motion.p>
         <motion.h2
           variants={staggerItem}
@@ -710,28 +711,10 @@ function CtaSection() {
           variants={staggerItem}
           className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-warm-400"
         >
-          Bergabung dan rasakan bagaimana prediksi berbasis AI bisa mengubah cara Anda merencanakan
-          stok dan promosi.
+          {user
+            ? 'Data historis Anda sudah tersimpan dan siap dianalisis. Buka dashboard lewat tombol di kanan atas untuk melihat prediksi terbaru.'
+            : 'Daftar gratis lewat tombol di pojok kanan atas — kurang dari satu menit, tanpa kartu kredit.'}
         </motion.p>
-
-        <motion.div
-          variants={staggerItem}
-          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-        >
-          <Link
-            to="/register"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary-500 px-8 py-4 text-base font-bold text-white shadow-warm-lg hover:bg-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-warm-900 transition-colors sm:w-auto"
-          >
-            Daftar Gratis Sekarang
-            <ArrowRight className="h-5 w-5" />
-          </Link>
-          <Link
-            to="/login"
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-warm-700 px-8 py-4 text-base font-semibold text-warm-300 hover:border-warm-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-500 focus-visible:ring-offset-2 focus-visible:ring-offset-warm-900 transition-colors sm:w-auto"
-          >
-            Sudah punya akun? Masuk
-          </Link>
-        </motion.div>
       </motion.div>
     </section>
   );
