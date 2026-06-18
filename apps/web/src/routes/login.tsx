@@ -43,19 +43,37 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Masuk ke UMKM-Sense</h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Belum punya akun?{' '}
-            <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Daftar sekarang
-            </Link>
-          </p>
+    <main className="auth-bg flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="auth-card-enter w-full max-w-md">
+        {/* Brand header */}
+        <div className="mb-8 flex flex-col items-center gap-4 text-center">
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-accent-600 shadow-warm-sm">
+              <span className="text-sm font-bold text-white">U</span>
+            </div>
+            <span className="font-display text-lg font-semibold text-warm-900">UMKM-Sense</span>
+          </Link>
+          <div>
+            <h1 className="font-display text-2xl font-bold text-warm-900">
+              Selamat datang kembali
+            </h1>
+            <p className="mt-1.5 text-sm text-warm-500">
+              Belum punya akun?{' '}
+              <Link
+                to="/register"
+                className="font-semibold text-primary-600 transition-colors hover:text-primary-700"
+              >
+                Daftar gratis
+              </Link>
+            </p>
+          </div>
         </div>
 
-        <div className="rounded-2xl bg-white px-8 py-10 shadow-sm ring-1 ring-gray-200">
+        {/* Form card */}
+        <div className="rounded-2xl bg-white px-8 py-10 shadow-warm-md ring-1 ring-warm-200">
           {globalError && (
             <div
               role="alert"
@@ -86,7 +104,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-end">
               <Link
                 to="/reset-password"
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                className="text-sm font-semibold text-primary-600 transition-colors hover:text-primary-700"
               >
                 Lupa password?
               </Link>

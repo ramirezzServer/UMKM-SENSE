@@ -12,7 +12,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
 
     return (
       <div className="flex flex-col gap-1.5">
-        <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
+        <label htmlFor={inputId} className="text-sm font-medium text-warm-700">
           {label}
         </label>
         <div className="relative">
@@ -24,10 +24,10 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             aria-invalid={error ? 'true' : 'false'}
             aria-describedby={error ? `${inputId}-error` : undefined}
             className={
-              'w-full rounded-lg border px-3.5 py-2.5 pr-11 text-sm text-gray-900 shadow-sm ' +
-              'placeholder:text-gray-400 transition-colors ' +
-              'focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ' +
-              (error ? 'border-red-400 bg-red-50 ' : 'border-gray-300 bg-white ') +
+              'w-full rounded-lg border px-3.5 py-2.5 pr-11 text-sm text-warm-900 shadow-sm ' +
+              'placeholder:text-warm-400 transition-colors ' +
+              'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ' +
+              (error ? 'border-red-400 bg-red-50 ' : 'border-warm-300 bg-white ') +
               className
             }
           />
@@ -36,7 +36,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             aria-label={visible ? 'Sembunyikan password' : 'Tampilkan password'}
             onClick={() => setVisible((v) => !v)}
             tabIndex={-1}
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-0 flex items-center px-3 text-warm-400 hover:text-warm-600 transition-colors"
           >
             {visible ? (
               // eye-off icon

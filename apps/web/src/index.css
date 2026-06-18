@@ -217,6 +217,22 @@
 
 .landing-silhouette-svg { height: 180px; display: block; }
 
+/* ── Auth pages (login / register) — warm background, static, calm ──────── */
+
+.auth-bg {
+  background-color: #FAFAF8;
+  background-image:
+    radial-gradient(ellipse 60% 50% at 15% 10%, rgb(245 158 11 / 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 60% at 85% 90%, rgb(20 184 166 / 0.09) 0%, transparent 60%);
+}
+
+@keyframes auth-card-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.auth-card-enter { animation: auth-card-in 0.38s ease-out both; }
+
 /* ── CTA section overlay (texture radials over the dark story gradient) ──── */
 
 .landing-cta-bg {
