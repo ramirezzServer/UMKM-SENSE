@@ -115,7 +115,7 @@ function HeroSection() {
       {/* Warm ambient background */}
       <div className="absolute inset-0 -z-10 landing-hero-bg" aria-hidden="true" />
 
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-20 md:px-10 lg:grid-cols-2 lg:py-28">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-20 md:px-10 lg:grid-cols-[5fr_6fr] lg:py-28">
         {/* Text side */}
         <div>
           {/* Label pill */}
@@ -196,7 +196,7 @@ function HeroSection() {
 
         {/* 3D / fallback side */}
         <motion.div
-          className="relative hidden h-[440px] lg:block"
+          className="relative hidden md:block h-[400px] lg:h-[640px]"
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: EASE, delay: 0.2 }}
@@ -337,7 +337,7 @@ function FeaturesSection() {
                 <f.icon className={`h-5 w-5 ${f.color}`} aria-hidden="true" />
               </div>
               <h3 className="mb-2 font-display text-base font-bold text-warm-900">{f.title}</h3>
-              <p className="text-sm leading-relaxed text-warm-500">{f.desc}</p>
+              <p className="text-sm leading-relaxed text-warm-600">{f.desc}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -438,7 +438,7 @@ function HowItWorksSection() {
                 </div>
 
                 <h3 className="mb-3 font-display text-lg font-bold text-warm-900">{step.title}</h3>
-                <p className="max-w-xs text-sm leading-relaxed text-warm-500">{step.desc}</p>
+                <p className="max-w-xs text-sm leading-relaxed text-warm-600">{step.desc}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -542,7 +542,7 @@ function WhySection() {
                 <h3 className="mb-1.5 font-display text-sm font-bold text-warm-900">
                   {item.title}
                 </h3>
-                <p className="text-xs leading-relaxed text-warm-500">{item.desc}</p>
+                <p className="text-xs leading-relaxed text-warm-600">{item.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -626,7 +626,7 @@ function LandingFooter() {
         <p className="text-xs text-warm-400">
           Platform Analitik &amp; Prediksi Penjualan untuk UMKM Indonesia
         </p>
-        <p className="text-xs text-warm-300">PKM-KC · {new Date().getFullYear()}</p>
+        <p className="text-xs text-warm-400">PKM-KC · {new Date().getFullYear()}</p>
       </div>
     </footer>
   );
