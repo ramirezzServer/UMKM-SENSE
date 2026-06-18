@@ -157,12 +157,12 @@
 /* ── Coin / Rupiah particle rise ─────────────────────────────────────────── */
 
 @keyframes coin-float-up {
-  0%   { transform: translateY(0) translateX(0);    opacity: 0;    }
-  10%  {                                             opacity: 0.22; }
-  35%  { transform: translateY(-90px) translateX(5px);  }
+  0%   { transform: translateY(0) translateX(0);         opacity: 0; }
+  10%  { opacity: var(--peak-opacity, 0.22); }
+  35%  { transform: translateY(-90px)  translateX(5px);  }
   65%  { transform: translateY(-190px) translateX(-4px); }
-  88%  {                                             opacity: 0.16; }
-  100% { transform: translateY(-310px) translateX(3px); opacity: 0; }
+  88%  { opacity: var(--fade-opacity, 0.16); }
+  100% { transform: translateY(-310px) translateX(3px);  opacity: 0; }
 }
 
 .landing-coin {
@@ -205,9 +205,13 @@
 
 /* ── Trend-line SVG container & per-line timing ──────────────────────────── */
 
-.landing-trend-svg  { opacity: 0.5; }
+/* Container opacity removed — each path controls its own via strokeOpacity SVG attr */
+.landing-trend-svg   { }
 .landing-trend-teal  { animation-duration: 20s; animation-delay:   0s; }
 .landing-trend-amber { animation-duration: 26s; animation-delay:  -8s; }
+.landing-trend-3     { animation-duration: 18s; animation-delay:  -4s; } /* secondary teal  */
+.landing-trend-4     { animation-duration: 38s; animation-delay: -16s; } /* indigo, slow    */
+.landing-trend-5     { animation-duration: 28s; animation-delay: -10s; } /* dark amber      */
 
 /* ── City-silhouette SVG (full-width, 180 px tall, block for gap removal) ── */
 

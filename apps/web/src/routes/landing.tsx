@@ -52,18 +52,57 @@ const staggerItem = {
 
 // ─── UMKM story background ───────────────────────────────────────────────────
 
-// Deterministic coin positions — golden-angle spiral, no Math.random at module scope
-const COIN_DATA = Array.from({ length: 20 }, (_, i) => ({
-  left: `${4 + ((i * 53 + i * i * 3) % 88)}%`,
-  bottom: `${5 + ((i * 47) % 60)}%`,
-  size: 5 + (i % 4) * 2, // 5 | 7 | 9 | 11 px cycling
-  duration: `${9 + (i % 6) * 1.5}s`, // 9 → 18.5 s
-  delay: `-${(i * 0.83) % 7}s`, // negative = already mid-flight on load
+// ── Density knobs — lower these if the page feels sluggish on demo hardware ──
+// Desktop total: FAR_COUNT + MID_COUNT + NEAR_COUNT = 65 coins
+// Mobile total:  8 + 6 + 4 = 18 coins (auto-selected below)
+const _isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+const FAR_COUNT = _isMobile ? 8 : 30;
+const MID_COUNT = _isMobile ? 6 : 22;
+const NEAR_COUNT = _isMobile ? 4 : 13;
+
+// ── Tiered coin data (deterministic — no Math.random) ─────────────────────────
+// Far  (small, slow, faint — suggests depth)
+const FAR_COINS = Array.from({ length: FAR_COUNT }, (_, i) => ({
+  left: `${3 + ((i * 71 + i * i * 13) % 90)}%`,
+  bottom: `${2 + ((i * 85 + 23) % 91)}%`,
+  size: 2 + (i % 3) * 0.9, // 2.0 | 2.9 | 3.8 px
+  peak: +(0.06 + (i % 5) * 0.008).toFixed(3), // 0.060–0.092
+  fade: +(0.04 + (i % 4) * 0.006).toFixed(3), // 0.040–0.058
+  dur: `${11 + (i % 8) * 1.2}s`, // 11–19.4 s (slowest)
+  del: `-${(i * 0.93) % 9}s`,
+}));
+// Mid  (medium size and speed)
+const MID_COINS = Array.from({ length: MID_COUNT }, (_, i) => ({
+  left: `${5 + ((i * 67 + i * i * 11) % 86)}%`,
+  bottom: `${4 + ((i * 79 + 17) % 88)}%`,
+  size: 5 + (i % 4), // 5 | 6 | 7 | 8 px
+  peak: +(0.13 + (i % 5) * 0.012).toFixed(3), // 0.130–0.178
+  fade: +(0.09 + (i % 4) * 0.01).toFixed(3), // 0.090–0.120
+  dur: `${8 + (i % 6)}s`, // 8–13 s
+  del: `-${(i * 1.15) % 8}s`,
+}));
+// Near (large, bright, fast — closest to viewer)
+const NEAR_COINS = Array.from({ length: NEAR_COUNT }, (_, i) => ({
+  left: `${6 + ((i * 83 + i * i * 17) % 82)}%`,
+  bottom: `${5 + ((i * 47 + 31) % 84)}%`,
+  size: 9 + (i % 4) * 1.5, // 9 | 10.5 | 12 | 13.5 px
+  peak: +(0.2 + (i % 5) * 0.018).toFixed(3), // 0.200–0.272
+  fade: +(0.14 + (i % 4) * 0.016).toFixed(3), // 0.140–0.188
+  dur: `${5.5 + (i % 5) * 0.8}s`, // 5.5–9.1 s (fastest)
+  del: `-${(i * 1.3) % 7}s`,
 }));
 
-// City silhouette path — Indonesian UMKM skyline (warung / toko / ruko / tenda)
-// ViewBox 0 0 1440 160, ground at y=160
-const SILHOUETTE_PATH =
+// ── Silhouette SVG paths ───────────────────────────────────────────────────────
+// Back — simple distant-city blocks (low opacity, slower parallax)
+const SILHOUETTE_BACK =
+  'M0,160 L0,148 L80,148 L80,132 L200,132 L200,140 L320,140 L320,124 ' +
+  'L420,124 L420,132 L520,132 L520,116 L600,116 L600,124 L720,124 ' +
+  'L720,108 L800,108 L800,118 L900,118 L900,106 L980,106 L980,114 ' +
+  'L1080,114 L1080,122 L1160,122 L1160,112 L1240,112 L1240,120 ' +
+  'L1360,120 L1360,132 L1440,132 L1440,160 Z';
+
+// Front — detailed UMKM skyline (warung / toko / ruko / tenda)
+const SILHOUETTE_FRONT =
   'M0,160 L0,118 L50,118 L50,100 L90,100 L90,78 L115,78 L120,65 L125,52 L130,65 ' +
   'L130,78 L160,78 L160,95 L195,95 L195,58 L240,58 L240,70 L255,58 L268,44 L282,58 ' +
   'L282,82 L312,82 L312,52 L358,52 L358,70 L375,58 L388,45 L402,58 L402,80 L430,80 ' +
@@ -76,85 +115,89 @@ const SILHOUETTE_PATH =
   'L1362,98 L1362,118 L1440,118 L1440,160 Z';
 
 function LandingBackground() {
-  const silhouetteRef = useRef<HTMLDivElement>(null);
+  // Refs for multi-layer parallax (direct DOM writes — no React state = no re-renders)
+  const backSilRef = useRef<HTMLDivElement>(null);
+  const frontSilRef = useRef<HTMLDivElement>(null);
+  const trendRef = useRef<SVGSVGElement>(null);
+  const farGrpRef = useRef<HTMLDivElement>(null);
+  const midGrpRef = useRef<HTMLDivElement>(null);
+  const nearGrpRef = useRef<HTMLDivElement>(null);
+  const mouseRef = useRef({ x: 0, y: 0 });
   const prefersReduced = useReducedMotion();
 
-  // Parallax: silhouette scrolls slower than content → appears "further away"
   useEffect(() => {
     if (prefersReduced) return;
-    const el = silhouetteRef.current;
-    if (!el) return;
+
+    // Scroll parallax — each layer at different speed for depth illusion
     const onScroll = () => {
-      el.style.transform = `translateY(${window.scrollY * -0.12}px)`;
+      const sy = window.scrollY;
+      const mx = mouseRef.current.x;
+      if (backSilRef.current)
+        backSilRef.current.style.transform = `translateY(${sy * -0.06}px) translateX(${mx * 8}px)`;
+      if (frontSilRef.current)
+        frontSilRef.current.style.transform = `translateY(${sy * -0.14}px) translateX(${mx * 16}px)`;
     };
+
+    // Mouse parallax — near coins shift more than far coins (depth)
+    const onMouse = (e: MouseEvent) => {
+      const mx = (e.clientX / window.innerWidth - 0.5) * 40; // ±20 px
+      const my = (e.clientY / window.innerHeight - 0.5) * 20; // ±10 px
+      mouseRef.current = { x: mx / 20, y: my / 10 }; // normalized for scroll use
+
+      if (trendRef.current)
+        trendRef.current.style.transform = `translate(${mx * 0.15}px,${my * 0.1}px)`;
+      if (farGrpRef.current)
+        farGrpRef.current.style.transform = `translate(${mx * 0.12}px,${my * 0.08}px)`;
+      if (midGrpRef.current)
+        midGrpRef.current.style.transform = `translate(${mx * 0.35}px,${my * 0.22}px)`;
+      if (nearGrpRef.current)
+        nearGrpRef.current.style.transform = `translate(${mx * 0.7}px,${my * 0.45}px)`;
+
+      // Re-apply scroll parallax with updated mouse offset
+      onScroll();
+    };
+
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('mousemove', onMouse, { passive: true });
     return () => {
       window.removeEventListener('scroll', onScroll);
-      if (el) el.style.transform = '';
+      window.removeEventListener('mousemove', onMouse);
+      [backSilRef, frontSilRef, trendRef, farGrpRef, midGrpRef, nearGrpRef].forEach((r) => {
+        if (r.current) r.current.style.transform = '';
+      });
     };
   }, [prefersReduced]);
 
-  // Halve coin count on mobile for performance
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const coins = isMobile ? COIN_DATA.slice(0, 10) : COIN_DATA;
-
-  // Per-coin position CSS is injected as a <style> block to avoid inline-style
-  // attributes (which the project linter forbids). Positions are truly data-driven
-  // and cannot be expressed as static Tailwind classes.
-  const coinStyles = coins
-    .map(
+  // Per-coin CSS injection — positions + opacity CSS vars (no inline-style attributes)
+  const coinStyles = [
+    ...FAR_COINS.map(
       (c, i) =>
-        `.lc-${i}{left:${c.left};bottom:${c.bottom};width:${c.size}px;` +
-        `height:${c.size}px;animation-duration:${c.duration};animation-delay:${c.delay}}`
-    )
-    .join('');
+        `.lc-f${i}{left:${c.left};bottom:${c.bottom};width:${c.size}px;height:${c.size}px;` +
+        `animation-duration:${c.dur};animation-delay:${c.del};` +
+        `--peak-opacity:${c.peak};--fade-opacity:${c.fade}}`
+    ),
+    ...MID_COINS.map(
+      (c, i) =>
+        `.lc-m${i}{left:${c.left};bottom:${c.bottom};width:${c.size}px;height:${c.size}px;` +
+        `animation-duration:${c.dur};animation-delay:${c.del};` +
+        `--peak-opacity:${c.peak};--fade-opacity:${c.fade}}`
+    ),
+    ...NEAR_COINS.map(
+      (c, i) =>
+        `.lc-n${i}{left:${c.left};bottom:${c.bottom};width:${c.size}px;height:${c.size}px;` +
+        `animation-duration:${c.dur};animation-delay:${c.del};` +
+        `--peak-opacity:${c.peak};--fade-opacity:${c.fade}}`
+    ),
+  ].join('');
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-      {/* Layer 1 — full-page story gradient (dawn → night) */}
+      {/* ── Base gradient: fajar (hero) → siang → senja → malam kota (CTA) ─── */}
       <div className="absolute inset-0 landing-story-gradient" />
 
-      {/* Layer 2 — growing trend lines: simbol prediksi naik */}
-      <svg
-        className="absolute inset-0 w-full h-full landing-trend-svg"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-      >
-        {/* Primary teal trend line */}
-        <path
-          d="M -5,86 C 18,78 40,60 62,51 S 90,33 106,24"
-          pathLength="200"
-          stroke="#0D9488"
-          strokeWidth="0.38"
-          fill="none"
-          strokeDasharray="200"
-          className="landing-trend-line landing-trend-teal"
-        />
-        {/* Secondary amber trend line */}
-        <path
-          d="M -5,78 C 14,71 38,56 63,47 S 91,28 106,17"
-          pathLength="200"
-          stroke="#F59E0B"
-          strokeWidth="0.26"
-          fill="none"
-          strokeDasharray="200"
-          className="landing-trend-line landing-trend-amber"
-        />
-      </svg>
-
-      {/* Layer 3 — floating coin / Rupiah particles (simbol omzet naik) */}
-      {!prefersReduced && (
-        <>
-          <style>{coinStyles}</style>
-          {coins.map((_, i) => (
-            <span key={i} className={`landing-coin lc-${i}`} />
-          ))}
-        </>
-      )}
-
-      {/* Layer 4 — city silhouette at bottom (parallax scroll) */}
+      {/* ── Back silhouette — kota jauh, pudar, parallax lambat (−0.06) ─────── */}
       <div
-        ref={silhouetteRef}
+        ref={backSilRef}
         className={`absolute bottom-0 left-0 right-0${prefersReduced ? '' : ' will-change-transform'}`}
       >
         <svg
@@ -163,13 +206,124 @@ function LandingBackground() {
           className="w-full landing-silhouette-svg"
         >
           <defs>
-            {/* Fade from very subtle at skyline top → more present at ground */}
-            <linearGradient id="silGrad" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="silBack" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3D1C0A" stopOpacity="0.02" />
+              <stop offset="100%" stopColor="#3D1C0A" stopOpacity="0.10" />
+            </linearGradient>
+          </defs>
+          <path d={SILHOUETTE_BACK} fill="url(#silBack)" />
+        </svg>
+      </div>
+
+      {/* ── 5 garis tren — berbeda ketebalan, warna, timing (pasar yang hidup) */}
+      <svg
+        ref={trendRef}
+        className="absolute inset-0 w-full h-full landing-trend-svg"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+      >
+        {/* 1 — Teal utama, tebal, kuat */}
+        <path
+          d="M -5,86 C 18,78 40,60 62,51 S 90,33 106,24"
+          pathLength="200"
+          stroke="#0D9488"
+          strokeWidth="0.40"
+          strokeOpacity="0.80"
+          fill="none"
+          strokeDasharray="200"
+          className="landing-trend-line landing-trend-teal"
+        />
+        {/* 2 — Amber utama, medium */}
+        <path
+          d="M -5,78 C 14,71 38,56 63,47 S 91,28 106,17"
+          pathLength="200"
+          stroke="#F59E0B"
+          strokeWidth="0.28"
+          strokeOpacity="0.72"
+          fill="none"
+          strokeDasharray="200"
+          className="landing-trend-line landing-trend-amber"
+        />
+        {/* 3 — Teal sekunder, tipis, lebih lambat */}
+        <path
+          d="M -5,92 C 22,84 46,70 68,61 S 94,44 110,36"
+          pathLength="200"
+          stroke="#0D9488"
+          strokeWidth="0.18"
+          strokeOpacity="0.48"
+          fill="none"
+          strokeDasharray="200"
+          className="landing-trend-line landing-trend-3"
+        />
+        {/* 4 — Indigo, sangat tipis, sangat lambat — aksen brand */}
+        <path
+          d="M -5,70 C 20,65 42,52 65,43 S 92,26 108,15"
+          pathLength="200"
+          stroke="#6366F1"
+          strokeWidth="0.22"
+          strokeOpacity="0.38"
+          fill="none"
+          strokeDasharray="200"
+          className="landing-trend-line landing-trend-4"
+        />
+        {/* 5 — Amber gelap, paling atas, paling pudar */}
+        <path
+          d="M -5,60 C 16,54 38,44 61,36 S 88,18 106,8"
+          pathLength="200"
+          stroke="#D97706"
+          strokeWidth="0.16"
+          strokeOpacity="0.30"
+          fill="none"
+          strokeDasharray="200"
+          className="landing-trend-line landing-trend-5"
+        />
+      </svg>
+
+      {/* ── Koin Rupiah melayang — 3 lapisan kedalaman ─────────────────────── */}
+      {!prefersReduced && (
+        <>
+          <style>{coinStyles}</style>
+
+          {/* Far — kecil, pudar, lambat (kesan jauh) */}
+          <div ref={farGrpRef} className="absolute inset-0">
+            {FAR_COINS.map((_, i) => (
+              <span key={`f${i}`} className={`landing-coin lc-f${i}`} />
+            ))}
+          </div>
+
+          {/* Mid — ukuran sedang */}
+          <div ref={midGrpRef} className="absolute inset-0">
+            {MID_COINS.map((_, i) => (
+              <span key={`m${i}`} className={`landing-coin lc-m${i}`} />
+            ))}
+          </div>
+
+          {/* Near — besar, cerah, cepat (kesan dekat) */}
+          <div ref={nearGrpRef} className="absolute inset-0">
+            {NEAR_COINS.map((_, i) => (
+              <span key={`n${i}`} className={`landing-coin lc-n${i}`} />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* ── Front silhouette — kota depan, pekat, parallax cepat (−0.14) ───── */}
+      <div
+        ref={frontSilRef}
+        className={`absolute bottom-0 left-0 right-0${prefersReduced ? '' : ' will-change-transform'}`}
+      >
+        <svg
+          viewBox="0 0 1440 160"
+          preserveAspectRatio="xMidYMax slice"
+          className="w-full landing-silhouette-svg"
+        >
+          <defs>
+            <linearGradient id="silFront" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#3D1C0A" stopOpacity="0.05" />
               <stop offset="100%" stopColor="#3D1C0A" stopOpacity="0.38" />
             </linearGradient>
           </defs>
-          <path d={SILHOUETTE_PATH} fill="url(#silGrad)" />
+          <path d={SILHOUETTE_FRONT} fill="url(#silFront)" />
         </svg>
       </div>
     </div>
