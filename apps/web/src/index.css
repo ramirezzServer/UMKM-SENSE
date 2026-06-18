@@ -137,19 +137,89 @@
    LANDING PAGE — ambient backgrounds (complex multi-gradient, not Tailwind-able)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
+/* ── UMKM story gradient: pasar pagi → siang → senja → malam kota ──────── */
+
+.landing-story-gradient {
+  background: linear-gradient(
+    to bottom,
+    #FFFCEF 0%,      /* fajar amber hangat — hero */
+    #FAFAF8 10%,     /* cahaya pagi */
+    #F7F7F5 38%,     /* siang warm-neutral */
+    #F3F0EA 58%,     /* sore hangat — fitur */
+    #EAE2D5 70%,     /* pre-senja — cara kerja */
+    #7A3A12 79%,     /* senja dramatis — mengapa */
+    #3B1908 86%,     /* gelap petang — CTA */
+    #1C1917 92%,     /* malam kota */
+    #1C1917 100%
+  );
+}
+
+/* ── Coin / Rupiah particle rise ─────────────────────────────────────────── */
+
+@keyframes coin-float-up {
+  0%   { transform: translateY(0) translateX(0);    opacity: 0;    }
+  10%  {                                             opacity: 0.22; }
+  35%  { transform: translateY(-90px) translateX(5px);  }
+  65%  { transform: translateY(-190px) translateX(-4px); }
+  88%  {                                             opacity: 0.16; }
+  100% { transform: translateY(-310px) translateX(3px); opacity: 0; }
+}
+
+.landing-coin {
+  position: absolute;
+  border-radius: 50%;
+  /* warm gold radial — center highlight gives coin feel */
+  background: radial-gradient(circle at 35% 35%, #FDE68A 0%, #F59E0B 60%, #D97706 100%);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation-name: coin-float-up;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* ── Trend-line SVG stroke draw animation ────────────────────────────────── */
+
+@keyframes trend-appear {
+  0%   { stroke-dashoffset: 200; opacity: 0;   }
+  8%   {                          opacity: 1;   }
+  72%  { stroke-dashoffset:   0; opacity: 0.6; }
+  88%  { stroke-dashoffset:   0; opacity: 0;   }
+  100% { stroke-dashoffset: 200; opacity: 0;   }
+}
+
+.landing-trend-line {
+  animation: trend-appear ease-in-out infinite;
+  animation-fill-mode: both;
+}
+
+/* ── Hero section overlay (amber/teal radials on top of story gradient) ──── */
+
 .landing-hero-bg {
   background:
-    radial-gradient(ellipse 70% 60% at 10% 15%, rgb(245 158 11 / 0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 65% 70% at 90% 85%, rgb(20 184 166 / 0.14) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 55% 5%,  rgb(99 102 241 / 0.08) 0%, transparent 55%),
-    #FAFAF9;
+    radial-gradient(ellipse 72% 62% at 10% 18%, rgb(245 158 11 / 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 68% 72% at 92% 82%, rgb(20 184 166  / 0.16) 0%, transparent 60%),
+    radial-gradient(ellipse 52% 42% at 55%  5%, rgb(99 102 241  / 0.09) 0%, transparent 55%);
+  /* No solid base — story gradient provides the background colour */
 }
+
+/* ── Trend-line SVG container & per-line timing ──────────────────────────── */
+
+.landing-trend-svg  { opacity: 0.5; }
+.landing-trend-teal  { animation-duration: 20s; animation-delay:   0s; }
+.landing-trend-amber { animation-duration: 26s; animation-delay:  -8s; }
+
+/* ── City-silhouette SVG (full-width, 180 px tall, block for gap removal) ── */
+
+.landing-silhouette-svg { height: 180px; display: block; }
+
+/* ── CTA section overlay (texture radials over the dark story gradient) ──── */
 
 .landing-cta-bg {
   background:
-    radial-gradient(ellipse 70% 80% at 20% 50%, rgb(120 53 15 / 0.9) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 70% at 80% 30%, rgb(67 56 202 / 0.4) 0%, transparent 60%),
-    #1C1917;
+    radial-gradient(ellipse 70% 80% at 20% 50%, rgb(120 53 15 / 0.75) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 80% 30%, rgb(67  56 202 / 0.35) 0%, transparent 60%);
+  /* No solid #1C1917 — story gradient provides the dark base */
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -169,7 +239,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ambient-drift-1,
-  .ambient-drift-2 {
+  .ambient-drift-2,
+  .landing-coin,
+  .landing-trend-line {
     animation: none;
     will-change: auto;
   }
@@ -183,6 +255,12 @@
   .ambient-drift-1,
   .ambient-drift-2 {
     display: none;
+  }
+
+  /* Fewer coin particles on mobile — React conditionally halves count,
+     but also cap animation complexity here */
+  .landing-coin {
+    animation-duration: 14s !important;
   }
 
   .glass-card {

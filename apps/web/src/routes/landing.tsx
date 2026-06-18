@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -49,6 +49,132 @@ const staggerItem = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
 };
+
+// ─── UMKM story background ───────────────────────────────────────────────────
+
+// Deterministic coin positions — golden-angle spiral, no Math.random at module scope
+const COIN_DATA = Array.from({ length: 20 }, (_, i) => ({
+  left: `${4 + ((i * 53 + i * i * 3) % 88)}%`,
+  bottom: `${5 + ((i * 47) % 60)}%`,
+  size: 5 + (i % 4) * 2, // 5 | 7 | 9 | 11 px cycling
+  duration: `${9 + (i % 6) * 1.5}s`, // 9 → 18.5 s
+  delay: `-${(i * 0.83) % 7}s`, // negative = already mid-flight on load
+}));
+
+// City silhouette path — Indonesian UMKM skyline (warung / toko / ruko / tenda)
+// ViewBox 0 0 1440 160, ground at y=160
+const SILHOUETTE_PATH =
+  'M0,160 L0,118 L50,118 L50,100 L90,100 L90,78 L115,78 L120,65 L125,52 L130,65 ' +
+  'L130,78 L160,78 L160,95 L195,95 L195,58 L240,58 L240,70 L255,58 L268,44 L282,58 ' +
+  'L282,82 L312,82 L312,52 L358,52 L358,70 L375,58 L388,45 L402,58 L402,80 L430,80 ' +
+  'L430,62 L472,62 L472,88 L502,88 L502,70 L516,55 L530,70 L530,65 L575,65 L575,88 ' +
+  'L612,88 L612,42 L670,42 L670,65 L695,52 L710,38 L725,52 L725,72 L758,72 L758,50 ' +
+  'L805,50 L805,75 L822,62 L836,48 L850,62 L850,70 L882,70 L882,55 L928,55 L928,88 ' +
+  'L958,88 L958,72 L972,58 L986,72 L986,80 L1018,80 L1018,58 L1062,58 L1062,90 ' +
+  'L1090,90 L1090,68 L1104,54 L1118,68 L1118,78 L1152,78 L1152,55 L1195,55 L1195,88 ' +
+  'L1222,88 L1222,65 L1237,50 L1252,65 L1252,80 L1285,80 L1285,55 L1328,55 L1328,98 ' +
+  'L1362,98 L1362,118 L1440,118 L1440,160 Z';
+
+function LandingBackground() {
+  const silhouetteRef = useRef<HTMLDivElement>(null);
+  const prefersReduced = useReducedMotion();
+
+  // Parallax: silhouette scrolls slower than content → appears "further away"
+  useEffect(() => {
+    if (prefersReduced) return;
+    const el = silhouetteRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      el.style.transform = `translateY(${window.scrollY * -0.12}px)`;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (el) el.style.transform = '';
+    };
+  }, [prefersReduced]);
+
+  // Halve coin count on mobile for performance
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const coins = isMobile ? COIN_DATA.slice(0, 10) : COIN_DATA;
+
+  // Per-coin position CSS is injected as a <style> block to avoid inline-style
+  // attributes (which the project linter forbids). Positions are truly data-driven
+  // and cannot be expressed as static Tailwind classes.
+  const coinStyles = coins
+    .map(
+      (c, i) =>
+        `.lc-${i}{left:${c.left};bottom:${c.bottom};width:${c.size}px;` +
+        `height:${c.size}px;animation-duration:${c.duration};animation-delay:${c.delay}}`
+    )
+    .join('');
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+      {/* Layer 1 — full-page story gradient (dawn → night) */}
+      <div className="absolute inset-0 landing-story-gradient" />
+
+      {/* Layer 2 — growing trend lines: simbol prediksi naik */}
+      <svg
+        className="absolute inset-0 w-full h-full landing-trend-svg"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+      >
+        {/* Primary teal trend line */}
+        <path
+          d="M -5,86 C 18,78 40,60 62,51 S 90,33 106,24"
+          pathLength="200"
+          stroke="#0D9488"
+          strokeWidth="0.38"
+          fill="none"
+          strokeDasharray="200"
+          className="landing-trend-line landing-trend-teal"
+        />
+        {/* Secondary amber trend line */}
+        <path
+          d="M -5,78 C 14,71 38,56 63,47 S 91,28 106,17"
+          pathLength="200"
+          stroke="#F59E0B"
+          strokeWidth="0.26"
+          fill="none"
+          strokeDasharray="200"
+          className="landing-trend-line landing-trend-amber"
+        />
+      </svg>
+
+      {/* Layer 3 — floating coin / Rupiah particles (simbol omzet naik) */}
+      {!prefersReduced && (
+        <>
+          <style>{coinStyles}</style>
+          {coins.map((_, i) => (
+            <span key={i} className={`landing-coin lc-${i}`} />
+          ))}
+        </>
+      )}
+
+      {/* Layer 4 — city silhouette at bottom (parallax scroll) */}
+      <div
+        ref={silhouetteRef}
+        className={`absolute bottom-0 left-0 right-0${prefersReduced ? '' : ' will-change-transform'}`}
+      >
+        <svg
+          viewBox="0 0 1440 160"
+          preserveAspectRatio="xMidYMax slice"
+          className="w-full landing-silhouette-svg"
+        >
+          <defs>
+            {/* Fade from very subtle at skyline top → more present at ground */}
+            <linearGradient id="silGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#3D1C0A" stopOpacity="0.05" />
+              <stop offset="100%" stopColor="#3D1C0A" stopOpacity="0.38" />
+            </linearGradient>
+          </defs>
+          <path d={SILHOUETTE_PATH} fill="url(#silGrad)" />
+        </svg>
+      </div>
+    </div>
+  );
+}
 
 // ─── Nav ─────────────────────────────────────────────────────────────────────
 
@@ -284,7 +410,7 @@ const FEATURES = [
 
 function FeaturesSection() {
   return (
-    <section className="bg-white py-24" id="fitur">
+    <section className="py-24" id="fitur">
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         {/* Header */}
         <motion.div
@@ -308,7 +434,7 @@ function FeaturesSection() {
           </motion.h2>
           <motion.p
             variants={staggerItem}
-            className="mx-auto mt-4 max-w-xl text-base text-warm-500"
+            className="mx-auto mt-4 max-w-xl text-base text-warm-700"
           >
             Dari pencatatan sederhana hingga prediksi berbasis AI — dirancang khusus untuk ritme
             bisnis UMKM Indonesia.
@@ -380,7 +506,7 @@ const STEPS = [
 
 function HowItWorksSection() {
   return (
-    <section className="bg-warm-50 py-24" id="cara-kerja">
+    <section className="py-24" id="cara-kerja">
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         {/* Header */}
         <motion.div
@@ -483,7 +609,7 @@ const WHY_ITEMS = [
 
 function WhySection() {
   return (
-    <section className="bg-white py-24" id="mengapa">
+    <section className="py-24" id="mengapa">
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         <motion.div
           className="grid grid-cols-1 gap-14 lg:grid-cols-2 lg:items-center"
@@ -510,7 +636,7 @@ function WhySection() {
             </motion.h2>
             <motion.p
               variants={staggerItem}
-              className="mt-5 max-w-md text-base leading-relaxed text-warm-500"
+              className="mt-5 max-w-md text-base leading-relaxed text-warm-700"
             >
               Banyak tools prediksi terasa seperti blackbox. UMKM-Sense dirancang agar pemilik UMKM
               bisa memahami dan mempercayai hasilnya — dengan konteks lokal Indonesia.
@@ -636,7 +762,8 @@ function LandingFooter() {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-warm-50">
+    <div className="relative min-h-screen overflow-x-hidden">
+      <LandingBackground />
       <LandingNav />
       <main>
         <HeroSection />
