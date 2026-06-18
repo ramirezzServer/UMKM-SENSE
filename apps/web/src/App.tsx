@@ -25,6 +25,7 @@ const AnalyticsPage = lazy(() => import('@/routes/analytics'));
 const PredictionsPage = lazy(() => import('@/routes/predictions'));
 const PredictionDetailPage = lazy(() => import('@/routes/prediction-detail'));
 const CalendarPage = lazy(() => import('@/routes/calendar'));
+const ProfileBusinessPage = lazy(() => import('@/routes/profile-business'));
 const StyleguidePage = lazy(() => import('@/routes/dev/styleguide'));
 
 // ─── Scroll restoration ───────────────────────────────────────────────────────
@@ -178,6 +179,14 @@ const router = createBrowserRouter([
                 element: (
                   <Suspense fallback={<PageFallback />}>
                     <CalendarPage />
+                  </Suspense>
+                ),
+              },
+              {
+                path: '/profile-business',
+                element: (
+                  <Suspense fallback={<PageFallback />}>
+                    <ProfileBusinessPage />
                   </Suspense>
                 ),
               },

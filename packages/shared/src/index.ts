@@ -29,6 +29,16 @@ export const RegisterFormSchema = z
   });
 export type RegisterForm = z.infer<typeof RegisterFormSchema>;
 
+export const UpdateProfileFormSchema = z.object({
+  name: z.string().min(1, 'Nama usaha wajib diisi').max(100, 'Nama usaha maksimal 100 karakter'),
+  category: z.enum(['Kuliner', 'Ritel', 'Jasa', 'Lainnya'], {
+    required_error: 'Kategori usaha wajib dipilih',
+    invalid_type_error: 'Kategori usaha tidak valid',
+  }),
+  district: z.string().min(1, 'Kecamatan wajib dipilih'),
+});
+export type UpdateProfileForm = z.infer<typeof UpdateProfileFormSchema>;
+
 export const ForgotPasswordFormSchema = z.object({
   email: z.string().email('Format email tidak valid'),
 });

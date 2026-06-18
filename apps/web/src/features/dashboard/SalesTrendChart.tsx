@@ -82,7 +82,7 @@ export default function SalesTrendChart({ days = 7 }: { days?: number }) {
         </div>
       ) : (
         <div className="mt-4 h-52">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" debounce={50}>
             <AreaChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               {/* Gradient fill definition */}
               <defs>
