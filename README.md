@@ -385,3 +385,33 @@ Di production, tambahkan satu entri cron di server:
 Dikembangkan sebagai proyek PKM-KC (Program Kreativitas Mahasiswa — Karsa Cipta).
 
 © 2026 Tim UMKM-Sense. Hak cipta dilindungi.
+
+## ⚖️ Lisensi & Hak Cipta / License & Copyright
+
+> **Status: PROPRIETARY — Bukan Open Source / Not Open Source**
+> **© 2026 Tim "Dikumpulin Besok" (PKM-KC). Seluruh Hak Dilindungi / All Rights Reserved.**
+
+#### 🇮🇩 Bahasa Indonesia
+
+Repositori ini bersifat **publik hanya untuk dilihat** (keperluan penilaian akademik PKM-KC, portofolio, dan rujukan). Repositori ini **BUKAN open source**.
+
+Dilarang keras **menyalin, menggunakan, menjalankan, mengubah, mendistribusikan, atau menggunakan kembali** kode sumber maupun bagian substansial dari proyek ini — baik untuk keperluan komersial maupun non-komersial — **tanpa izin tertulis** dari pemegang hak cipta.
+
+Karya ini dilindungi **Undang-Undang No. 28 Tahun 2014 tentang Hak Cipta**. Setiap pelanggaran dapat dikenai **tanggung jawab perdata dan/atau pidana**, dan pemegang hak cipta berhak menempuh seluruh upaya hukum yang berlaku di Republik Indonesia.
+
+Ketentuan lengkap: lihat berkas [`LICENSE`](./LICENSE) dan [`COPYRIGHT`](./COPYRIGHT).
+
+#### 🇬🇧 English
+
+This repository is **public for viewing only** (for academic evaluation, portfolio, and reference purposes). It is **NOT open source**.
+
+You may **not copy, use, run, modify, distribute, or reuse** the source code or any substantial part of this project — for commercial or non-commercial purposes — **without prior written permission** from the copyright holder.
+
+This work is protected under **Indonesian Copyright Law (UU No. 28 Tahun 2014)**. Any infringement may result in **civil and/or criminal liability**, and the copyright holder reserves the right to pursue all legal remedies available under the laws of the Republic of Indonesia.
+
+Full terms: see [`LICENSE`](./LICENSE) and [`COPYRIGHT`](./COPYRIGHT).
+
+---
+
+**Kontak / Contact (perwakilan tim / team representative):**
+Faris · [faris651234@gmail.com](mailto:faris651234@gmail.com?subject=Izin%20Penggunaan%20UMKM-Sense) · [@ramirezzServer](https://github.com/ramirezzServer)
